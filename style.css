@@ -544,6 +544,8 @@ input[type="range"] {
 }
 
 .front-uploaded-logo {
+  -webkit-mask-image: radial-gradient(circle, black 62%, transparent 98%);
+  mask-image: radial-gradient(circle, black 62%, transparent 98%);
   height: var(--f-logo-size);
   width: auto;
   max-width: 320px;
