@@ -475,14 +475,48 @@ function renderCardContent() {
   const sContainer = document.getElementById('outServicesContainer');
   sContainer.innerHTML = '';
 
-  // 줄바꿈, 쉼표(,), 가운뎃점(·), 슬래시(/) 기준으로 서비스 단어들을 자동 분리
-  const tokens = servicesRaw.split(/[\n,·/&]+/).map(s => s.trim()).filter(Boolean);
-  const lines = servicesRaw.split('\n').map(s => s.trim()).filter(Boolean);
+  const rawLines = servicesRaw.split('\n').map(l => l.trim()).filter(Boolean);
+  const allTokens = servicesRaw.split(/[\n,·/|]+/).map(s => s.trim()).filter(Boolean);
 
-  if (serviceMode === 'track-grid') {
+  if (serviceMode === 'dia-inline' || serviceMode === 'slash-modern' || serviceMode === 'pipe-clean') {
+    const stack = document.createElement('div');
+    stack.className = 'srv-lines-stack';
+
+    rawLines.forEach((lineText, lineIdx) => {
+      const lineItems = lineText.split(/[,·/|]+/).map(s => s.trim()).filter(Boolean);
+      if (lineItems.length === 0) return;
+
+      const row = document.createElement('div');
+      row.className = 'srv-line-row' + (lineIdx > 0 ? ' sub-line' : '');
+
+      lineItems.forEach((item, idx) => {
+        const word = document.createElement('span');
+        word.textContent = item;
+        row.appendChild(word);
+
+        if (idx < lineItems.length - 1) {
+          const sep = document.createElement('span');
+          if (serviceMode === 'dia-inline') {
+            sep.className = 'srv-sep-dia';
+            sep.textContent = '◆';
+          } else if (serviceMode === 'slash-modern') {
+            sep.className = 'srv-sep-slash';
+            sep.textContent = '/';
+          } else {
+            sep.className = 'srv-sep-pipe';
+            sep.textContent = '│';
+          }
+          row.appendChild(sep);
+        }
+      });
+      stack.appendChild(row);
+    });
+    sContainer.appendChild(stack);
+
+  } else if (serviceMode === 'track-2col' || serviceMode === 'track-3col') {
     const grid = document.createElement('div');
-    grid.className = 'srv-track-grid';
-    tokens.forEach((tok, idx) => {
+    grid.className = 'srv-track-grid' + (serviceMode === 'track-3col' ? ' cols-3' : '');
+    allTokens.forEach((tok, idx) => {
       const num = String(idx + 1).padStart(2, '0');
       const item = document.createElement('div');
       item.className = 'srv-track-item';
@@ -490,56 +524,18 @@ function renderCardContent() {
       grid.appendChild(item);
     });
     sContainer.appendChild(grid);
-  } else if (serviceMode === 'dia-inline') {
-    const wrap = document.createElement('div');
-    wrap.className = 'srv-dia-inline';
-    tokens.forEach((tok, idx) => {
-      const sp = document.createElement('span');
-      sp.textContent = tok;
-      wrap.appendChild(sp);
-      if (idx < tokens.length - 1) {
-        const sep = document.createElement('span');
-        sep.className = 'srv-dia-sep';
-        sep.textContent = '◆';
-        wrap.appendChild(sep);
-      }
-    });
-    sContainer.appendChild(wrap);
+
   } else if (serviceMode === 'accent-bar') {
-    const d = document.createElement('div');
-    d.className = 'srv-accent-bar';
-    d.textContent = servicesRaw;
-    sContainer.appendChild(d);
-  } else if (serviceMode === 'slash-modern') {
-    const wrap = document.createElement('div');
-    wrap.className = 'srv-slash-modern';
-    tokens.forEach((tok, idx) => {
-      const sp = document.createElement('span');
-      sp.textContent = tok;
-      wrap.appendChild(sp);
-      if (idx < tokens.length - 1) {
-        const sep = document.createElement('span');
-        sep.className = 'srv-slash-sep';
-        sep.textContent = '/';
-        wrap.appendChild(sep);
-      }
-    });
-    sContainer.appendChild(wrap);
-  } else if (serviceMode === 'credit-split') {
-    const wrap = document.createElement('div');
-    wrap.className = 'srv-credit-list';
-    lines.forEach(line => {
+    const barBox = document.createElement('div');
+    barBox.className = 'srv-accent-bar';
+    rawLines.forEach((lineText, lineIdx) => {
+      const lineItems = lineText.split(/[,·/|]+/).map(s => s.trim()).filter(Boolean);
       const row = document.createElement('div');
-      row.className = 'srv-credit-row';
-      row.innerHTML = `<span>${line}</span>`;
-      wrap.appendChild(row);
+      row.className = 'srv-line-row' + (lineIdx > 0 ? ' sub-line' : '');
+      row.textContent = lineItems.join('  ·  ');
+      barBox.appendChild(row);
     });
-    sContainer.appendChild(wrap);
-  } else {
-    const d = document.createElement('div');
-    d.className = 'back-services-text';
-    d.textContent = servicesRaw;
-    sContainer.appendChild(d);
+    sContainer.appendChild(barBox);
   }
 
   // 좌측 연락처 (심볼 단독 고정 + 선택적 마이크로 코드)
@@ -581,17 +577,23 @@ function updateDecorations() {
   const sOff = document.getElementById('rSIconY')?.value || 0;
   const iconSz = document.getElementById('rIconSz')?.value || 13;
   const diaSz = document.getElementById('rDiaSz')?.value || 8;
+  const srvSz = document.getElementById('rSrvSz')?.value || 12;
+  const srvGap = document.getElementById('rSrvGap')?.value || 5;
 
   if (document.getElementById('vCIconY')) document.getElementById('vCIconY').textContent = cOff + 'px';
   if (document.getElementById('vSIconY')) document.getElementById('vSIconY').textContent = sOff + 'px';
   if (document.getElementById('vIconSz')) document.getElementById('vIconSz').textContent = iconSz + 'px';
   if (document.getElementById('vDiaSz')) document.getElementById('vDiaSz').textContent = diaSz + 'px';
+  if (document.getElementById('vSrvSz')) document.getElementById('vSrvSz').textContent = srvSz + 'px';
+  if (document.getElementById('vSrvGap')) document.getElementById('vSrvGap').textContent = srvGap + 'px';
 
   const root = document.documentElement;
   root.style.setProperty('--c-icon-offset-y', cOff + 'px');
   root.style.setProperty('--s-icon-offset-y', sOff + 'px');
   root.style.setProperty('--symbol-size', iconSz + 'px');
   root.style.setProperty('--dia-size', diaSz + 'px');
+  root.style.setProperty('--srv-font-size', srvSz + 'px');
+  root.style.setProperty('--srv-row-gap', srvGap + 'px');
 
   const diaType = document.getElementById('selDiaType')?.value || 'solid';
   const nameRule = document.getElementById('selNameRule')?.value || 'dia-rule';

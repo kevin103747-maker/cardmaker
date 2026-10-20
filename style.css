@@ -996,105 +996,96 @@ input[type="range"] {
   z-index: 1;
 }
 
-/* ================= [신규] 부피를 줄이고 눈에 확 들어오는 서비스 레이아웃 5종 ================= */
+/* ================= [개선] 줄바꿈 보장 & 기호 잘림 방지 서비스 레이아웃 ================= */
+:root {
+  --srv-font-size: 12px;
+  --srv-row-gap: 5px;
+}
 
-/* 1) 트랙 넘버 2단 그리드 (01 작곡  02 편곡) - 컴팩트 & 시선 집중 최고 */
-.srv-track-grid {
-  display: grid;
-  grid-template-columns: repeat(2, auto);
-  justify-content: start;
-  column-gap: 20px;
-  row-gap: 5px;
+/* 줄 단위 그룹 (사용자가 엔터 친 줄을 절대 강제로 쪼개지 않음) */
+.srv-lines-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--srv-row-gap);
   margin-top: 2px;
 }
-.srv-track-item {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 5px;
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--text-main);
-  letter-spacing: var(--service-tracking);
-  line-height: 1.3;
-}
-.srv-track-num {
-  font-size: 9px;
-  font-family: monospace;
-  font-weight: 700;
-  color: var(--accent);
-  opacity: 0.45;
-}
 
-/* 2) 다이아몬드 모듈러 인라인 (작곡 ◆ 편곡 ◆ 작사) */
-.srv-dia-inline {
+.srv-line-row {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
-  row-gap: 4px;
-  column-gap: 7px;
-  font-size: 12.2px;
+  flex-wrap: nowrap; /* 자동 줄바꿈으로 기호가 끝에 남는 현상 원천 차단 */
+  gap: 7px;
+  font-size: var(--srv-font-size);
   font-weight: 500;
   color: var(--text-main);
-  line-height: 1.45;
-}
-.srv-dia-sep {
-  font-size: 5.5px;
-  color: var(--accent);
-  opacity: 0.5;
-  transform: translateY(-0.5px);
+  line-height: 1.25;
+  white-space: nowrap;
 }
 
-/* 3) 좌측 버티컬 액센트 바 (▎ 에디토리얼 블록) */
-.srv-accent-bar {
-  border-left: 1.8px solid var(--accent);
-  padding-left: 10px;
-  font-size: 12.2px;
-  font-weight: 400;
+/* 두 번째 줄부터는 살짝 차분한 톤으로 위계 부여 (원할 경우 가독성 상승) */
+.srv-line-row.sub-line {
   color: var(--text-sub);
-  line-height: 1.55;
-  white-space: pre-line;
+  font-weight: 400;
 }
 
-/* 4) 모던 타이포 슬래시 (작곡 / 편곡 / 작사) */
-.srv-slash-modern {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  row-gap: 4px;
-  column-gap: 6px;
-  font-size: 12.2px;
-  font-weight: 500;
-  color: var(--text-main);
-  line-height: 1.45;
+.srv-sep-dia {
+  font-size: calc(var(--srv-font-size) * 0.45);
+  color: var(--accent);
+  opacity: 0.55;
+  display: inline-flex;
+  align-items: center;
 }
-.srv-slash-sep {
-  font-size: 11px;
+
+.srv-sep-slash {
+  font-size: calc(var(--srv-font-size) * 0.9);
   font-weight: 300;
   color: var(--accent);
   opacity: 0.4;
 }
 
-/* 5) 스튜디오 크레딧 라인 정렬 (줄별 포인트 도트 정렬) */
-.srv-credit-list {
+.srv-sep-pipe {
+  font-size: calc(var(--srv-font-size) * 0.85);
+  font-weight: 300;
+  color: var(--accent);
+  opacity: 0.35;
+}
+
+/* 트랙 넘버 그리드 (2열 / 3열 칼정렬, 폭 균등 배분) */
+.srv-track-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 14px;
+  row-gap: var(--srv-row-gap);
+  margin-top: 2px;
+}
+.srv-track-grid.cols-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  column-gap: 10px;
+}
+.srv-track-item {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  font-size: var(--srv-font-size);
+  font-weight: 500;
+  color: var(--text-main);
+  line-height: 1.25;
+  white-space: nowrap;
+}
+.srv-track-num {
+  font-size: calc(var(--srv-font-size) * 0.75);
+  font-family: monospace;
+  font-weight: 700;
+  color: var(--accent);
+  opacity: 0.45;
+  flex-shrink: 0;
+}
+
+/* 좌측 버티컬 액센트 바 */
+.srv-accent-bar {
+  border-left: 1.8px solid var(--accent);
+  padding-left: 10px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
-}
-.srv-credit-row {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  font-size: 12px;
-  color: var(--text-sub);
-  line-height: 1.35;
-}
-.srv-credit-row::before {
-  content: "―";
-  font-size: 9px;
-  color: var(--accent);
-  opacity: 0.5;
-}
-.srv-credit-row strong {
-  color: var(--text-main);
-  font-weight: 600;
+  gap: var(--srv-row-gap);
 }

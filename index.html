@@ -200,23 +200,34 @@
             <input type="text" id="inMicroLabel" class="inp" value="SPECIALTIES" placeholder="비워두면 숨김" oninput="renderCardContent()">
           </div>
           <div>
-            <label class="lbl">서비스 디자인 모드</label>
+            <label class="lbl">서비스 디자인 모드 (엔터 줄바꿈 기준)</label>
             <select id="selServiceMode" class="inp" onchange="renderCardContent()">
-              <option value="track-grid" selected>1. 트랙 넘버 2단 그리드 (01 작곡  02 편곡)</option>
-              <option value="dia-inline">2. 다이아몬드 모듈러 (작곡 ◆ 편곡 ◆ 작사)</option>
-              <option value="accent-bar">3. 좌측 버티컬 바 (▎ 에디토리얼 블록)</option>
-              <option value="slash-modern">4. 타이포 슬래시 (작곡  /  편곡  /  작사)</option>
-              <option value="credit-split">5. 스튜디오 크레딧 2줄 정렬</option>
-              <option value="text">기본 텍스트 줄글</option>
+              <option value="dia-inline" selected>1. 다이아몬드 구분 (줄바꿈 유지 · 끝기호 없음)</option>
+              <option value="slash-modern">2. 모던 슬래시 구분 (작곡 / 편곡 / 작사)</option>
+              <option value="pipe-clean">3. 버티컬 바 구분 (작곡 │ 편곡 │ 작사)</option>
+              <option value="track-2col">4. 트랙 넘버 2열 칼정렬 (01 작곡  02 편곡)</option>
+              <option value="track-3col">5. 트랙 넘버 3열 컴팩트 (01 작곡 02 편곡 03 작사)</option>
+              <option value="accent-bar">6. 좌측 버티컬 바 (▎ 에디토리얼 블록)</option>
             </select>
           </div>
         </div>
-        <div class="field-row">
-          <label class="lbl">제공 서비스 내용 (작곡, 편곡, 작사 등)</label>
-          <textarea id="inServices" class="inp" oninput="renderCardContent()">Composing · Arranging · Lyrics
-Vocal Directing & Mixing, Mastering</textarea>
+        <div class="grid-2">
+          <div>
+            <label class="lbl"><span>서비스 글자 크기</span><span><span class="val-badge" id="vSrvSz">12px</span> <i class="fa-solid fa-rotate-left sl-reset" onclick="resetSingleSlider('rSrvSz', 12)"></i></span></label>
+            <input type="range" id="rSrvSz" min="9.5" max="15" step="0.5" value="12" ondblclick="resetSingleSlider('rSrvSz', 12)" oninput="updateDecorations()">
+          </div>
+          <div>
+            <label class="lbl"><span>서비스 줄간격 (행간)</span><span><span class="val-badge" id="vSrvGap">5px</span> <i class="fa-solid fa-rotate-left sl-reset" onclick="resetSingleSlider('rSrvGap', 5)"></i></span></label>
+            <input type="range" id="rSrvGap" min="2" max="12" step="1" value="5" ondblclick="resetSingleSlider('rSrvGap', 5)" oninput="updateDecorations()">
+          </div>
         </div>
-      </div>
+        <div class="field-row">
+          <label class="lbl">
+            <span>제공 서비스 내용 (엔터=줄바꿈 고정, 같은 줄은 쉼표 `,`로 구분)</span>
+          </label>
+          <textarea id="inServices" class="inp" oninput="renderCardContent()">Composing, Arranging, Lyrics
+Vocal Directing, Mixing & Mastering</textarea>
+        </div>
 
       <!-- 5. 연락처 항목 (클린 심볼 고정 + 프리픽스 디테일) -->
       <div class="panel-box">
