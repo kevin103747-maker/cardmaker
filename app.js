@@ -342,17 +342,17 @@ function resetIconOffsets(target) {
   updateDecorations();
 }
 
-// 5. 틈새 제로(Seamless) 클래식 정사각 & 직각 프레임 고정 QR 엔진
+// 5. 틈새 제로(Seamless) 클래식 정사각 & html2canvas 완벽 호환 QR 엔진
 function renderCustomQRSvgString() {
   const url = document.getElementById('inQrUrl')?.value.trim() || 'https://example.com';
   const acc = document.getElementById('cAcc')?.value || '#181818';
+  const qrSz = document.getElementById('rQrSz')?.value || 142;
 
   const qr = qrcode(0, 'M');
   qr.addData(url);
   qr.make();
   const count = qr.getModuleCount();
 
-  // 모든 검은색 모듈을 하나의 단일 Path로 병합하여 조각 사이의 미세한 틈새(실금)를 원천 차단
   let pathData = '';
   for (let r = 0; r < count; r++) {
     for (let c = 0; c < count; c++) {
@@ -362,7 +362,8 @@ function renderCustomQRSvgString() {
     }
   }
 
-  return `<svg viewBox="0 0 ${count} ${count}" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
+  // width, height 속성을 명시해야 html2canvas(PNG/PDF 저장)가 멈추지 않음!
+  return `<svg width="${qrSz}" height="${qrSz}" viewBox="0 0 ${count} ${count}" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
     <path d="${pathData}" fill="${acc}" />
   </svg>`;
 }
@@ -786,7 +787,7 @@ function resetToDefault() {
   }
 }
 
-// 9. PNG / 순수 벡터(SVG) / 인쇄용 PDF 내보내기
+// 9. PNG / 순수 벡터(앞+뒤 SVG) / 인쇄용 양면 PDF 완벽 내보내기
 function prepareForCleanCapture(callback) {
   const wrap = document.getElementById('stageWrap');
   const hadGuides = wrap.classList.contains('show-guides');
@@ -800,21 +801,50 @@ function prepareForCleanCapture(callback) {
       if (hadGuides) wrap.classList.add('show-guides');
       if (hadMockup) wrap.classList.add('mockup-3d');
     });
-  }, 120);
+  }, 150);
+}
+
+// html2canvas가 인라인 SVG(QR코드)에서 멈추지 않도록 onclone에서 <img>로 안전 변환
+function getCanvasOptions() {
+  return {
+    scale: 3,
+    useCORS: true,
+    allowTaint: true,
+    backgroundColor: null,
+    onclone: (clonedDoc) => {
+      const svgs = clonedDoc.querySelectorAll('#outQrBox svg');
+      svgs.forEach(svgEl => {
+        const xml = new XMLSerializer().serializeToString(svgEl);
+        const img = clonedDoc.createElement('img');
+        img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(xml);
+        img.style.width = '100%';
+        img.style.height = '100%';
+        img.style.display = 'block';
+        svgEl.parentNode.replaceChild(img, svgEl);
+      });
+    }
+  };
 }
 
 function exportRasterPNG(targetId, label) {
   const target = document.getElementById(targetId);
+  if (!target) return;
   const prevDisp = target.style.display;
   target.style.display = 'block';
 
   prepareForCleanCapture((restore) => {
-    html2canvas(target, { scale: 3, useCORS: true, backgroundColor: null }).then(canvas => {
+    html2canvas(target, getCanvasOptions()).then(canvas => {
       const a = document.createElement('a');
-      const name = document.getElementById('inStage').value.trim() || 'Card';
+      const name = document.getElementById('inStage')?.value.trim() || 'Card';
       a.download = `${name}_명함_${label}_인쇄용.png`;
       a.href = canvas.toDataURL('image/png');
+      document.body.appendChild(a);
       a.click();
+      document.body.removeChild(a);
+      target.style.display = prevDisp;
+      restore();
+    }).catch(err => {
+      console.error('PNG 캡처 오류:', err);
       target.style.display = prevDisp;
       restore();
     });
@@ -833,30 +863,32 @@ function escapeXml(unsafe) {
   });
 }
 
+// 순수 벡터 SVG 다운로드 (앞면 SVG + 뒷면 SVG 2개 파일 동시 출력)
 function exportPureVectorSVG() {
-  const bleedPx = parseFloat(document.getElementById('selBleed').value);
+  const bleedPx = parseFloat(document.getElementById('selBleed')?.value || 16.8);
   const bleedMm = bleedPx / 8.4;
   const totalW = 90 + (bleedMm * 2);
   const totalH = 50 + (bleedMm * 2);
 
-  const bg = document.getElementById('cBg').value;
-  const main = document.getElementById('cMain').value;
-  const sub = document.getElementById('cSub').value;
-  const acc = document.getElementById('cAcc').value;
+  const bg = document.getElementById('cBg')?.value || '#ffffff';
+  const main = document.getElementById('cMain')?.value || '#161616';
+  const sub = document.getElementById('cSub')?.value || '#767676';
+  const acc = document.getElementById('cAcc')?.value || '#181818';
 
-  const padX = parseFloat(document.getElementById('rPadX').value) / 8.4;
-  const padY = parseFloat(document.getElementById('rPadY').value) / 8.4;
-  const leftRatio = parseFloat(document.getElementById('rLeftRatio').value) / 100;
-  const divW = parseFloat(document.getElementById('rDivW').value) / 8.4;
-  const divH = parseFloat(document.getElementById('rDivH').value) / 100;
-  const qrMm = parseFloat(document.getElementById('rQrSz').value) / 8.4;
+  const padX = parseFloat(document.getElementById('rPadX')?.value || 56) / 8.4;
+  const padY = parseFloat(document.getElementById('rPadY')?.value || 50) / 8.4;
+  const leftRatio = parseFloat(document.getElementById('rLeftRatio')?.value || 56) / 100;
+  const divW = parseFloat(document.getElementById('rDivW')?.value || 1.2) / 8.4;
+  const divH = parseFloat(document.getElementById('rDivH')?.value || 92) / 100;
+  const qrMm = parseFloat(document.getElementById('rQrSz')?.value || 142) / 8.4;
 
-  const stageEn = document.getElementById('inStage').value.trim();
-  const stageKr = document.getElementById('inStageKr').value.trim();
-  const real = document.getElementById('inReal').value.trim();
-  const micro = document.getElementById('inMicroLabel').value.trim();
-  const servicesLines = document.getElementById('inServices').value.split('\n');
-  const handle = document.getElementById('inSocialHandle').value;
+  const stageEn = document.getElementById('inStage')?.value.trim() || 'AIDEN KIM';
+  const stageKr = document.getElementById('inStageKr')?.value.trim() || '';
+  const real = document.getElementById('inReal')?.value.trim() || '';
+  const micro = document.getElementById('inMicroLabel')?.value.trim() || '';
+  const servicesLines = (document.getElementById('inServices')?.value || '').split('\n').filter(Boolean);
+  const handle = document.getElementById('inSocialHandle')?.value || '';
+  const stamp = document.getElementById('inTopStamp')?.value.trim() || '';
 
   const x0 = bleedMm + padX;
   const y0 = bleedMm + padY;
@@ -866,56 +898,114 @@ function exportPureVectorSVG() {
   const divLen = innerH * divH;
   const divY1 = bleedMm + (50 - divLen) / 2;
 
+  const qrX = divX + ((90 - padX - (divX - bleedMm) - qrMm) / 2);
+  const qrY = bleedMm + (50 - qrMm - 4) / 2;
   const qrInnerSvg = renderCustomQRSvgString()
-    .replace('<svg ', `<svg x="${divX + ((90 - padX - (divX - bleedMm) - qrMm) / 2)}" y="${bleedMm + (50 - qrMm - 5) / 2}" width="${qrMm}" height="${qrMm}" `);
+    .replace(/<svg [^>]+>/, `<svg x="${qrX}" y="${qrY}" width="${qrMm}" height="${qrMm}" viewBox="0 0 ${qrcode(0, 'M').getModuleCount || 25} ${qrcode(0, 'M').getModuleCount || 25}">`);
 
-  let svgContent = `<?xml version="1.0" encoding="UTF-8"?>
+  // QR SVG의 원래 viewBox 유지하며 위치/크기만 지정
+  const rawQr = renderCustomQRSvgString();
+  const vbMatch = rawQr.match(/viewBox="([^"]+)"/);
+  const vbAttr = vbMatch ? `viewBox="${vbMatch[1]}"` : '';
+  const pathMatch = rawQr.match(/<path [^>]+>/);
+  const pathTag = pathMatch ? pathMatch[0] : '';
+
+  // [1] 뒷면(Back) SVG 생성
+  let svgBack = `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="${totalW}mm" height="${totalH}mm" viewBox="0 0 ${totalW} ${totalH}">
-  <rect x="0" y="0" width="${totalW}" height="${totalH}" fill="${bg}"/>
-  <text x="${x0}" y="${y0 + 3.2}" fill="${main}" font-family="Plus Jakarta Sans, Pretendard, sans-serif" font-size="3.1" font-weight="800">${escapeXml(stageEn)} <tspan font-size="2.1" font-weight="600">${escapeXml(stageKr)}</tspan> <tspan fill="${sub}" font-size="1.6" font-weight="400">${real ? '| ' + escapeXml(real) : ''}</tspan></text>
-`;
+  <rect x="0" y="0" width="${totalW}" height="${totalH}" fill="${bg}"/>\n`;
 
-  let curY = y0 + 6.8;
+  let curY = y0 + 1.5;
+  if (stamp) {
+    svgBack += `  <text x="${x0}" y="${curY}" fill="${sub}" opacity="0.7" font-family="monospace" font-size="1.05" font-weight="600" letter-spacing="0.18">◆ ${escapeXml(stamp)}</text>\n`;
+    curY += 3.2;
+  } else {
+    curY += 1.8;
+  }
+
+  svgBack += `  <text x="${x0}" y="${curY}" fill="${main}" font-family="Plus Jakarta Sans, Pretendard, sans-serif" font-size="3.0" font-weight="800">${escapeXml(stageEn)} <tspan font-size="2.0" font-weight="600">${escapeXml(stageKr)}</tspan></text>\n`;
+  if (real) {
+    curY += 2.2;
+    svgBack += `  <text x="${x0}" y="${curY}" fill="${sub}" font-family="Pretendard, sans-serif" font-size="1.5">${escapeXml(real)}</text>\n`;
+  }
+
+  curY += 3.2;
   if (micro) {
-    svgContent += `  <text x="${x0}" y="${curY}" fill="${acc}" opacity="0.6" font-family="sans-serif" font-size="1.1" font-weight="700" letter-spacing="0.2">${escapeXml(micro)}</text>\n`;
+    svgBack += `  <text x="${x0}" y="${curY}" fill="${acc}" opacity="0.6" font-family="sans-serif" font-size="1.05" font-weight="700" letter-spacing="0.2">${escapeXml(micro)}</text>\n`;
     curY += 2.2;
   }
 
-  servicesLines.forEach(line => {
-    svgContent += `  <text x="${x0}" y="${curY}" fill="${sub}" font-family="Pretendard, sans-serif" font-size="1.55">${escapeXml(line)}</text>\n`;
-    curY += 2.4;
+  servicesLines.forEach((line, idx) => {
+    const formattedLine = line.split(/[,·/|]+/).map(s => s.trim()).filter(Boolean).join('  ◆  ');
+    svgBack += `  <text x="${x0}" y="${curY}" fill="${idx === 0 ? main : sub}" font-family="Pretendard, sans-serif" font-size="1.45" font-weight="${idx === 0 ? '500' : '400'}">${escapeXml(formattedLine)}</text>\n`;
+    curY += 2.2;
   });
 
-  let conY = bleedMm + 50 - padY - ((contacts.length - 1) * 2.8);
+  let conY = bleedMm + 50 - padY - ((contacts.length - 1) * 2.7);
   contacts.forEach(c => {
-    svgContent += `  <text x="${x0}" y="${conY}" fill="${main}" font-family="Plus Jakarta Sans, Pretendard, sans-serif" font-size="1.55">${escapeXml(c.text)}</text>\n`;
-    conY += 2.8;
+    svgBack += `  <text x="${x0}" y="${conY}" fill="${main}" font-family="Plus Jakarta Sans, Pretendard, sans-serif" font-size="1.5">${escapeXml(c.text)}</text>\n`;
+    conY += 2.7;
   });
 
-  svgContent += `  <line x1="${divX}" y1="${divY1}" x2="${divX}" y2="${divY1 + divLen}" stroke="${acc}" stroke-width="${divW}"/>\n`;
-  svgContent += `  ${qrInnerSvg}\n`;
+  svgBack += `  <line x1="${divX}" y1="${divY1}" x2="${divX}" y2="${divY1 + divLen}" stroke="${acc}" stroke-width="${divW}"/>\n`;
+  svgBack += `  <text x="${divX}" y="${bleedMm + 25.3}" text-anchor="middle" fill="${acc}" font-size="1.2">◆</text>\n`;
+  svgBack += `  <svg x="${qrX}" y="${qrY}" width="${qrMm}" height="${qrMm}" ${vbAttr} shape-rendering="crispEdges">${pathTag}</svg>\n`;
 
   const rightCenterX = divX + ((bleedMm + 90 - padX - divX) / 2);
-  svgContent += `  <text x="${rightCenterX}" y="${bleedMm + (50 + qrMm) / 2 + 2.5}" text-anchor="middle" fill="${main}" font-family="Plus Jakarta Sans, sans-serif" font-size="1.45">${escapeXml(handle)}</text>\n`;
+  svgBack += `  <text x="${rightCenterX}" y="${qrY + qrMm + 3.5}" text-anchor="middle" fill="${main}" font-family="Plus Jakarta Sans, sans-serif" font-size="1.45">${escapeXml(handle)}</text>\n`;
 
   if (bleedMm > 0) {
-    svgContent += `  <g id="Trim_Guide_Layer" opacity="0.35">
-    <rect x="${bleedMm}" y="${bleedMm}" width="90" height="50" fill="none" stroke="#ff0000" stroke-width="0.1" stroke-dasharray="1,1"/>
-  </g>\n`;
+    svgBack += `  <g id="Trim_Guide_Layer" opacity="0.35"><rect x="${bleedMm}" y="${bleedMm}" width="90" height="50" fill="none" stroke="#ff0000" stroke-width="0.1" stroke-dasharray="1,1"/></g>\n`;
   }
+  svgBack += `</svg>`;
 
-  svgContent += `</svg>`;
+  // [2] 앞면(Front) SVG 생성
+  const fBg = getComputedStyle(document.documentElement).getPropertyValue('--f-card-bg').trim() || bg;
+  const fMain = getComputedStyle(document.documentElement).getPropertyValue('--f-text-main').trim() || main;
+  const fSub = getComputedStyle(document.documentElement).getPropertyValue('--f-text-sub').trim() || sub;
+  const fAcc = getComputedStyle(document.documentElement).getPropertyValue('--f-accent').trim() || acc;
+  const fTitle = document.getElementById('inFrontMainText')?.value.trim() || stageEn;
+  const fSubTxt = document.getElementById('inFrontSubText')?.value.trim() || '';
+  const cx = totalW / 2;
+  const cy = totalH / 2;
 
-  const blob = new Blob([svgContent], { type: 'image/svg+xml;charset=utf-8' });
+  let svgFront = `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="${totalW}mm" height="${totalH}mm" viewBox="0 0 ${totalW} ${totalH}">
+  <rect x="0" y="0" width="${totalW}" height="${totalH}" fill="${fBg}"/>
+  <g transform="translate(${cx}, ${cy - 4})">
+    <rect x="-4" y="-4" width="8" height="8" fill="none" stroke="${fAcc}" stroke-width="0.25" transform="rotate(45)"/>
+    <text x="0" y="0.9" text-anchor="middle" fill="${fMain}" font-family="Plus Jakarta Sans, sans-serif" font-size="2.6" font-weight="800">${escapeXml(fTitle.substring(0, 2).toUpperCase())}</text>
+  </g>
+  <text x="${cx}" y="${bleedMm + 50 - padY - 4.5}" text-anchor="middle" fill="${fMain}" font-family="Plus Jakarta Sans, Pretendard, sans-serif" font-size="2.0" font-weight="700" letter-spacing="0.35">${escapeXml(fTitle)}</text>
+  <text x="${cx}" y="${bleedMm + 50 - padY - 2.0}" text-anchor="middle" fill="${fSub}" font-family="Plus Jakarta Sans, Pretendard, sans-serif" font-size="1.25" letter-spacing="0.25">${escapeXml(fSubTxt)}</text>
+  <text x="${cx}" y="${bleedMm + 50 - padY + 0.5}" text-anchor="middle" fill="${fAcc}" font-size="1.0">── ◆ ──</text>
+`;
+  if (bleedMm > 0) {
+    svgFront += `  <g id="Trim_Guide_Layer" opacity="0.35"><rect x="${bleedMm}" y="${bleedMm}" width="90" height="50" fill="none" stroke="#ff0000" stroke-width="0.1" stroke-dasharray="1,1"/></g>\n`;
+  }
+  svgFront += `</svg>`;
+
+  // 뒷면 & 앞면 SVG 순차 다운로드
+  downloadSvgBlob(svgBack, `${stageEn}_명함_뒷면_순수벡터(${totalW}x${totalH}mm).svg`);
+  setTimeout(() => {
+    downloadSvgBlob(svgFront, `${stageEn}_명함_앞면_순수벡터(${totalW}x${totalH}mm).svg`);
+  }, 300);
+}
+
+function downloadSvgBlob(content, filename) {
+  const blob = new Blob([content], { type: 'image/svg+xml;charset=utf-8' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `${stageEn || 'Card'}_명함_순수벡터(${totalW}x${totalH}mm).svg`;
+  a.download = filename;
+  document.body.appendChild(a);
   a.click();
+  document.body.removeChild(a);
 }
 
+// 인쇄소 입고용 양면 PDF 내보내기 (1페이지: 앞면, 2페이지: 뒷면)
 function exportPrintPDF() {
-  const bleedPx = parseFloat(document.getElementById('selBleed').value);
+  const bleedPx = parseFloat(document.getElementById('selBleed')?.value || 16.8);
   const bleedMm = bleedPx / 8.4;
   const wMm = 90 + (bleedMm * 2);
   const hMm = 50 + (bleedMm * 2);
@@ -929,28 +1019,39 @@ function exportPrintPDF() {
   backEl.style.display = 'block';
 
   prepareForCleanCapture(async (restore) => {
-    const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF({
-      orientation: 'landscape',
-      unit: 'mm',
-      format: [wMm, hMm]
-    });
+    try {
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF({
+        orientation: 'landscape',
+        unit: 'mm',
+        format: [wMm, hMm]
+      });
 
-    const canvasBack = await html2canvas(backEl, { scale: 4, useCORS: true });
-    pdf.addImage(canvasBack.toDataURL('image/png'), 'PNG', 0, 0, wMm, hMm);
+      const opts = getCanvasOptions();
+      opts.scale = 4; // 인쇄급 초고해상도
 
-    pdf.addPage([wMm, hMm], 'landscape');
-    const canvasFront = await html2canvas(frontEl, { scale: 4, useCORS: true });
-    pdf.addImage(canvasFront.toDataURL('image/png'), 'PNG', 0, 0, wMm, hMm);
+      // 1페이지: 앞면
+      const canvasFront = await html2canvas(frontEl, opts);
+      pdf.addImage(canvasFront.toDataURL('image/png'), 'PNG', 0, 0, wMm, hMm);
 
-    const name = document.getElementById('inStage').value.trim() || 'Card';
-    pdf.save(`${name}_인쇄소입고용_양면명함(${wMm}x${hMm}mm).pdf`);
+      // 2페이지: 뒷면
+      pdf.addPage([wMm, hMm], 'landscape');
+      const canvasBack = await html2canvas(backEl, opts);
+      pdf.addImage(canvasBack.toDataURL('image/png'), 'PNG', 0, 0, wMm, hMm);
 
-    frontEl.style.display = prevFront;
-    backEl.style.display = prevBack;
-    restore();
+      const name = document.getElementById('inStage')?.value.trim() || 'Card';
+      pdf.save(`${name}_인쇄소입고용_양면명함(${wMm}x${hMm}mm).pdf`);
+    } catch (err) {
+      console.error('PDF 생성 오류:', err);
+      alert('PDF 생성 중 오류가 발생했습니다: ' + err.message);
+    } finally {
+      frontEl.style.display = prevFront;
+      backEl.style.display = prevBack;
+      restore();
+    }
   });
 }
+
 
 // ================= 앞면(Front) 로고 업로드 및 렌더링 =================
 let uploadedLogoDataUrl = '';
