@@ -481,10 +481,24 @@ input[type="range"] {
 .crop-bl { bottom: calc(var(--bleed-px) - 14px); left: calc(var(--bleed-px) - 14px); border-right-width: 1px; border-top-width: 1px; }
 .crop-br { bottom: calc(var(--bleed-px) - 14px); right: calc(var(--bleed-px) - 14px); border-left-width: 1px; border-top-width: 1px; }
 
-/* ================= 앞면 (Front: 로고 + 심플 부가정보) ================= */
+/* ================= 앞면 (Front: 로고 + 심플 부가정보 & 독립 색상) ================= */
 :root {
   --f-logo-size: 64px;
+  --f-card-bg: #141517;
+  --f-text-main: #f3f4f6;
+  --f-text-sub: #9ca3af;
+  --f-accent: #e5e7eb;
 }
+
+/* 앞면 컨테이너 내부에서는 앞면 전용 컬러 변수가 우선 적용됨 */
+#card-front-wrap {
+  background-color: var(--f-card-bg);
+  --card-bg: var(--f-card-bg);
+  --text-main: var(--f-text-main);
+  --text-sub: var(--f-text-sub);
+  --accent: var(--f-accent);
+}
+
 
 #trim-front {
   display: flex;

@@ -384,6 +384,34 @@ Vocal Directing, Mixing & Mastering</textarea>
           <button class="btn-xs" onclick="switchView('flat-front')"><i class="fa-solid fa-eye"></i> 앞면 보기</button>
         </div>
 
+        <!-- 앞면 전용 독립 색상 모드 & 컬러 피커 -->
+        <div class="field-row">
+          <label class="lbl">앞면 색상 테마 모드</label>
+          <select id="selFrontColorMode" class="inp" onchange="updateFrontCard()">
+            <option value="custom" selected>앞면 색상 개별 지정 (아래 컬러피커 사용)</option>
+            <option value="invert">뒷면과 반전 대비 (다크 앞면 ↔ 라이트 뒷면)</option>
+            <option value="sync">뒷면 색상과 100% 동일하게 동기화</option>
+          </select>
+        </div>
+        <div class="grid-2" id="frontColorPickersWrap">
+          <div>
+            <label class="lbl">앞면 배경색</label>
+            <div class="color-pick"><input type="color" id="cFBg" value="#141517" oninput="updateFrontCard()"><span id="hFBg">#141517</span></div>
+          </div>
+          <div>
+            <label class="lbl">앞면 메인 폰트색</label>
+            <div class="color-pick"><input type="color" id="cFMain" value="#f3f4f6" oninput="updateFrontCard()"><span id="hFMain">#F3F4F6</span></div>
+          </div>
+          <div>
+            <label class="lbl">앞면 부가정보 폰트색</label>
+            <div class="color-pick"><input type="color" id="cFSub" value="#9ca3af" oninput="updateFrontCard()"><span id="hFSub">#9CA3AF</span></div>
+          </div>
+          <div>
+            <label class="lbl">앞면 로고·라인 포인트색</label>
+            <div class="color-pick"><input type="color" id="cFAcc" value="#e5e7eb" oninput="updateFrontCard()"><span id="hFAcc">#E5E7EB</span></div>
+          </div>
+        </div>
+
         <div class="grid-2">
           <div>
             <label class="lbl">앞면 로고 표시 방식</label>

@@ -111,6 +111,7 @@ function onColorInput() {
   r.style.setProperty('--accent', acc);
 
   renderCustomQR();
+  if (typeof updateFrontCard === 'function') updateFrontCard();
   saveStateToLocal();
 }
 
@@ -665,6 +666,18 @@ function updateDecorations() {
 function collectCurrentState() {
   const g = id => document.getElementById(id)?.value;
   return {
+   selFrontColorMode: g('selFrontColorMode'),
+   cFBg: g('cFBg'),
+   cFMain: g('cFMain'),
+   cFSub: g('cFSub'),
+   cFAcc: g('cFAcc'),
+   selFrontLogoMode: g('selFrontLogoMode'),
+   rFLogoSz: g('rFLogoSz'),
+   selLogoFilter: g('selLogoFilter'),
+   selFrontLayout: g('selFrontLayout'),
+   selFrontLine: g('selFrontLine'),
+   inFrontMainText: g('inFrontMainText'),
+   inFrontSubText: g('inFrontSubText'),
     bleed: g('selBleed'),
     guides: g('selGuides'),
     cBg: g('cBg'),
@@ -964,6 +977,44 @@ function resetSingleFront(id, defaultVal) {
 }
 
 function updateFrontCard() {
+  const fColMode = document.getElementById('selFrontColorMode')?.value || 'custom';
+  const pickerWrap = document.getElementById('frontColorPickersWrap');
+  if (pickerWrap) {
+    pickerWrap.style.display = fColMode === 'custom' ? 'grid' : 'none';
+  }
+
+  let fBg, fMain, fSub, fAcc;
+  if (fColMode === 'sync') {
+    // 뒷면 색상과 100% 동일하게 동기화
+    fBg = document.getElementById('cBg')?.value || '#ffffff';
+    fMain = document.getElementById('cMain')?.value || '#161616';
+    fSub = document.getElementById('cSub')?.value || '#767676';
+    fAcc = document.getElementById('cAcc')?.value || '#181818';
+  } else if (fColMode === 'invert') {
+    // 뒷면과 반전 대비 (뒷면 배경색을 앞면 글자색으로, 뒷면 글자색을 앞면 배경색으로)
+    fBg = document.getElementById('cMain')?.value || '#161616';
+    fMain = document.getElementById('cBg')?.value || '#ffffff';
+    fSub = document.getElementById('cSub')?.value || '#9ca3af';
+    fAcc = document.getElementById('cBg')?.value || '#ffffff';
+  } else {
+    // 앞면 개별 지정 컬러피커 값 사용
+    fBg = document.getElementById('cFBg')?.value || '#141517';
+    fMain = document.getElementById('cFMain')?.value || '#f3f4f6';
+    fSub = document.getElementById('cFSub')?.value || '#9ca3af';
+    fAcc = document.getElementById('cFAcc')?.value || '#e5e7eb';
+  }
+
+  if (document.getElementById('hFBg')) document.getElementById('hFBg').textContent = fBg.toUpperCase();
+  if (document.getElementById('hFMain')) document.getElementById('hFMain').textContent = fMain.toUpperCase();
+  if (document.getElementById('hFSub')) document.getElementById('hFSub').textContent = fSub.toUpperCase();
+  if (document.getElementById('hFAcc')) document.getElementById('hFAcc').textContent = fAcc.toUpperCase();
+
+  const root = document.documentElement;
+  root.style.setProperty('--f-card-bg', fBg);
+  root.style.setProperty('--f-text-main', fMain);
+  root.style.setProperty('--f-text-sub', fSub);
+  root.style.setProperty('--f-accent', fAcc);
+
   const logoMode = document.getElementById('selFrontLogoMode')?.value || 'monogram';
   const logoSz = document.getElementById('rFLogoSz')?.value || 64;
   const logoFilter = document.getElementById('selLogoFilter')?.value || 'none';
@@ -976,7 +1027,8 @@ function updateFrontCard() {
   if (document.getElementById('vFLogoSz')) {
     document.getElementById('vFLogoSz').textContent = logoSz + 'px';
   }
-  document.documentElement.style.setProperty('--f-logo-size', logoSz + 'px');
+  root.style.setProperty('--f-logo-size', logoSz + 'px');
+
 
   // 앞면 전체 구도 클래스 적용
   const trimFront = document.getElementById('trim-front');
