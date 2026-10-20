@@ -1235,3 +1235,21 @@ input[type="range"] {
   flex-direction: column;
   gap: var(--srv-row-gap);
 }
+
+/* ================= 폰트에 영향받지 않는 순수 기하학 다이아몬드 도형 ================= */
+.true-diamond {
+  display: inline-block;
+  width: var(--dia-size, 7px);
+  height: var(--dia-size, 7px);
+  background-color: var(--accent);
+  transform: rotate(45deg);
+  flex-shrink: 0;
+}
+.true-diamond.hollow {
+  background-color: var(--card-bg);
+  border: 1.4px solid var(--accent);
+}
+.true-diamond.sm {
+  width: 4.5px;
+  height: 4.5px;
+}

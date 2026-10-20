@@ -579,7 +579,7 @@ function updateDecorations() {
   const widget = document.getElementById('selMusicWidget')?.value || 'player';
   const stampText = document.getElementById('inTopStamp')?.value.trim() || '';
 
-  // 1) 중앙 다이아몬드 세로선 5가지 디테일
+  // 1) 중앙 다이아몬드 세로선 (폰트에 따라 작아지지 않는 진짜 기하학 도형 사용)
   const divLine = document.getElementById('outDividerLine');
   const gemEl = document.getElementById('outDividerGem');
   if (divLine && gemEl) {
@@ -587,13 +587,13 @@ function updateDecorations() {
     gemEl.className = 'divider-gem' + (diaType === 'double-gem' ? ' double-gem' : '');
 
     if (diaType === 'solid' || diaType === 'fade-dia') {
-      gemEl.innerHTML = '◆';
+      gemEl.innerHTML = '<span class="true-diamond"></span>';
     } else if (diaType === 'hollow') {
-      gemEl.innerHTML = '◇';
+      gemEl.innerHTML = '<span class="true-diamond hollow"></span>';
     } else if (diaType === 'triple') {
-      gemEl.innerHTML = '<span style="font-size:0.55em; opacity:0.6;">•</span><span>◆</span><span style="font-size:0.55em; opacity:0.6;">•</span>';
+      gemEl.innerHTML = '<span class="true-diamond sm" style="opacity:0.55"></span><span class="true-diamond"></span><span class="true-diamond sm" style="opacity:0.55"></span>';
     } else if (diaType === 'double-gem') {
-      gemEl.innerHTML = '<span>◆</span><span>◆</span>';
+      gemEl.innerHTML = '<span><span class="true-diamond"></span></span><span><span class="true-diamond"></span></span>';
     }
   }
 
@@ -804,26 +804,54 @@ function prepareForCleanCapture(callback) {
   }, 150);
 }
 
-// html2canvas가 createPattern을 아예 호출하지 못하도록 모든 gradient/pattern 배경을 원천 차단하는 캡처 옵션
+// 아이콘 깨짐(☒) 제로 + 이상한 띄어쓰기 제로 + 선 실종 제로 완벽 캡처 옵션
 function getCanvasOptions() {
   return {
-    scale: 3,
+    scale: 4, // 인쇄급 초고해상도
     useCORS: true,
     allowTaint: true,
     backgroundColor: null,
     onclone: (clonedDoc) => {
-      // 1) 부모(.studio-stage)의 radial-gradient를 포함해 모든 요소의 background-image(그라데이션/패턴)를 강제 해제!
-      //    이렇게 하면 html2canvas 내부에서 createPattern() 자체가 호출되지 않아 width/height 0 에러가 100% 사라집니다.
+      const acc = document.getElementById('cAcc')?.value || '#181818';
+      const fAcc = getComputedStyle(document.documentElement).getPropertyValue('--f-accent').trim() || acc;
+
+      // 1) createPattern 에러 원인(노이즈 배경 및 그라데이션)만 끄고,
+      //    html2canvas가 글자 사이에 이상한 띄어쓰기를 넣지 못하도록 일반 본문의 소수점 자간을 0px로 정규화!
       const styleFix = clonedDoc.createElement('style');
       styleFix.textContent = `
-        *, *::before, *::after {
+        .studio-stage, .card-bleed-container::after, .decor-bg-pattern,
+        .decor-frame.corner-bracket, .qr-box.framed {
           background-image: none !important;
+        }
+        /* 이상한 띄어쓰기(자간 벌어짐) 원천 차단 */
+        .c-text, .srv-line-row, .srv-track-item, .back-real-name-tag,
+        .social-handle, .back-stage-kr {
+          letter-spacing: 0px !important;
+          font-kerning: normal !important;
+        }
+        /* 캡처 시 사라지던 가상요소(::before/::after) 선들을 실제 크기로 강제 고정 */
+        .decor-name-rule.dia-rule::before, .decor-name-rule.dot-line::before {
+          display: inline-block !important;
+          width: 28px !important;
+          height: 1.5px !important;
+          background-color: ${acc} !important;
+        }
+        .front-line-box.dia-center::before, .front-line-box.dia-center::after {
+          display: inline-block !important;
+          width: 65px !important;
+          height: 1.2px !important;
+          background-color: ${fAcc} !important;
+        }
+        .front-line-box.dia-end::before {
+          display: inline-block !important;
+          width: 100% !important;
+          height: 1.2px !important;
+          background-color: ${fAcc} !important;
         }
       `;
       clonedDoc.head.appendChild(styleFix);
 
-      // 2) 코너 브래킷(.corner-bracket)과 QR 뷰파인더(.qr-box.framed)를 순수 border 조각으로 복원
-      const acc = document.getElementById('cAcc')?.value || '#181818';
+      // 2) 코너 브래킷(.corner-bracket)과 QR 뷰파인더(.qr-box.framed)를 실제 선(border)으로 복원
       const drawCorners = (el, size, weight, color) => {
         const pos = [
           `top:0;left:0;border-top:${weight}px solid ${color};border-left:${weight}px solid ${color};`,
@@ -840,11 +868,9 @@ function getCanvasOptions() {
 
       clonedDoc.querySelectorAll('#card-back-wrap .decor-frame.corner-bracket').forEach(el => drawCorners(el, 16, 1.2, acc));
       clonedDoc.querySelectorAll('#card-back-wrap .qr-box.framed').forEach(el => drawCorners(el, 10, 1.5, acc));
-
-      const fAcc = getComputedStyle(document.documentElement).getPropertyValue('--f-accent').trim() || acc;
       clonedDoc.querySelectorAll('#card-front-wrap .decor-frame.corner-bracket').forEach(el => drawCorners(el, 16, 1.2, fAcc));
 
-      // 3) QR코드 인라인 SVG에 명시적 픽셀 크기 부여 및 이미지 변환
+      // 3) QR코드 인라인 SVG 변환
       const qrSz = document.getElementById('rQrSz')?.value || 142;
       const svgs = clonedDoc.querySelectorAll('#outQrBox svg');
       svgs.forEach(svgEl => {
@@ -864,8 +890,6 @@ function getCanvasOptions() {
   };
 }
 
-
-// 화면과 100% 동일하게 캡처하는 고해상도 PNG 내보내기 (선 실종 & 이상한 띄어쓰기 완벽 해결)
 function exportRasterPNG(targetId, label) {
   const target = document.getElementById(targetId);
   if (!target) return;
@@ -874,14 +898,12 @@ function exportRasterPNG(targetId, label) {
 
   prepareForCleanCapture(async (restore) => {
     try {
-      const dataUrl = await htmlToImage.toPng(target, {
-        pixelRatio: 3, // 3배수 초고해상도 인쇄 품질
-        cacheBust: true
-      });
+      await document.fonts.ready; // 모든 웹폰트와 아이콘이 100% 로드된 후 캡처
+      const canvas = await html2canvas(target, getCanvasOptions());
       const a = document.createElement('a');
       const name = document.getElementById('inStage')?.value.trim() || 'Card';
       a.download = `${name}_명함_${label}_인쇄용.png`;
-      a.href = dataUrl;
+      a.href = canvas.toDataURL('image/png');
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -895,7 +917,6 @@ function exportRasterPNG(targetId, label) {
   });
 }
 
-// 인쇄소 입고용 양면 PDF 내보내기 (화면과 100% 동일한 렌더링)
 function exportPrintPDF() {
   const bleedPx = parseFloat(document.getElementById('selBleed')?.value || 16.8);
   const bleedMm = bleedPx / 8.4;
@@ -912,6 +933,7 @@ function exportPrintPDF() {
 
   prepareForCleanCapture(async (restore) => {
     try {
+      await document.fonts.ready;
       const { jsPDF } = window.jspdf;
       const pdf = new jsPDF({
         orientation: 'landscape',
@@ -919,19 +941,16 @@ function exportPrintPDF() {
         format: [wMm, hMm]
       });
 
-      const captureOpts = {
-        pixelRatio: 4, // 인쇄용 4배수 초고해상도
-        cacheBust: true
-      };
+      const opts = getCanvasOptions();
 
-      // 1페이지: 앞면 캡처
-      const frontDataUrl = await htmlToImage.toPng(frontEl, captureOpts);
-      pdf.addImage(frontDataUrl, 'PNG', 0, 0, wMm, hMm);
+      // 1페이지: 앞면
+      const canvasFront = await html2canvas(frontEl, opts);
+      pdf.addImage(canvasFront.toDataURL('image/png'), 'PNG', 0, 0, wMm, hMm);
 
-      // 2페이지: 뒷면 캡처
+      // 2페이지: 뒷면
       pdf.addPage([wMm, hMm], 'landscape');
-      const backDataUrl = await htmlToImage.toPng(backEl, captureOpts);
-      pdf.addImage(backDataUrl, 'PNG', 0, 0, wMm, hMm);
+      const canvasBack = await html2canvas(backEl, opts);
+      pdf.addImage(canvasBack.toDataURL('image/png'), 'PNG', 0, 0, wMm, hMm);
 
       const name = document.getElementById('inStage')?.value.trim() || 'Card';
       pdf.save(`${name}_인쇄소입고용_양면명함(${wMm}x${hMm}mm).pdf`);
@@ -945,6 +964,7 @@ function exportPrintPDF() {
     }
   });
 }
+
 
 
 
