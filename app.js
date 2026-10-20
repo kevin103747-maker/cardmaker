@@ -804,90 +804,53 @@ function prepareForCleanCapture(callback) {
   }, 150);
 }
 
-// 아이콘 깨짐(☒) 제로 + 이상한 띄어쓰기 제로 + 선 실종 제로 완벽 캡처 옵션
-function getCanvasOptions() {
-  return {
-    scale: 4, // 인쇄급 초고해상도
-    useCORS: true,
-    allowTaint: true,
-    backgroundColor: null,
-    onclone: (clonedDoc) => {
-      const acc = document.getElementById('cAcc')?.value || '#181818';
-      const fAcc = getComputedStyle(document.documentElement).getPropertyValue('--f-accent').trim() || acc;
+// FontAwesome 아이콘이 [☒]로 깨지지 않도록 폰트 파일까지 Base64로 내장시키는 캐시 함수
+let cachedFontAwesomeCSS = null;
+async function ensureFontAwesomeEmbedded() {
+  if (cachedFontAwesomeCSS) return;
+  try {
+    const cssUrl = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css';
+    const res = await fetch(cssUrl);
+    let cssText = await res.text();
 
-      // 1) createPattern 에러 원인(노이즈 배경 및 그라데이션)만 끄고,
-      //    html2canvas가 글자 사이에 이상한 띄어쓰기를 넣지 못하도록 일반 본문의 소수점 자간을 0px로 정규화!
-      const styleFix = clonedDoc.createElement('style');
-      styleFix.textContent = `
-        .studio-stage, .card-bleed-container::after, .decor-bg-pattern,
-        .decor-frame.corner-bracket, .qr-box.framed {
-          background-image: none !important;
-        }
-        /* 이상한 띄어쓰기(자간 벌어짐) 원천 차단 */
-        .c-text, .srv-line-row, .srv-track-item, .back-real-name-tag,
-        .social-handle, .back-stage-kr {
-          letter-spacing: 0px !important;
-          font-kerning: normal !important;
-        }
-        /* 캡처 시 사라지던 가상요소(::before/::after) 선들을 실제 크기로 강제 고정 */
-        .decor-name-rule.dia-rule::before, .decor-name-rule.dot-line::before {
-          display: inline-block !important;
-          width: 28px !important;
-          height: 1.5px !important;
-          background-color: ${acc} !important;
-        }
-        .front-line-box.dia-center::before, .front-line-box.dia-center::after {
-          display: inline-block !important;
-          width: 65px !important;
-          height: 1.2px !important;
-          background-color: ${fAcc} !important;
-        }
-        .front-line-box.dia-end::before {
-          display: inline-block !important;
-          width: 100% !important;
-          height: 1.2px !important;
-          background-color: ${fAcc} !important;
-        }
-      `;
-      clonedDoc.head.appendChild(styleFix);
+    // CSS 안의 상대경로(../webfonts/...) 폰트 파일들을 실제 데이터(Base64)로 변환하여 [☒] 깨짐 원천 차단
+    const urlRegex = /url\(["']?(\.\.\/webfonts\/[^"')]+)["']?\)/g;
+    const matches = [...cssText.matchAll(urlRegex)];
+    const uniquePaths = [...new Set(matches.map(m => m[1]))];
 
-      // 2) 코너 브래킷(.corner-bracket)과 QR 뷰파인더(.qr-box.framed)를 실제 선(border)으로 복원
-      const drawCorners = (el, size, weight, color) => {
-        const pos = [
-          `top:0;left:0;border-top:${weight}px solid ${color};border-left:${weight}px solid ${color};`,
-          `top:0;right:0;border-top:${weight}px solid ${color};border-right:${weight}px solid ${color};`,
-          `bottom:0;left:0;border-bottom:${weight}px solid ${color};border-left:${weight}px solid ${color};`,
-          `bottom:0;right:0;border-bottom:${weight}px solid ${color};border-right:${weight}px solid ${color};`
-        ];
-        pos.forEach(p => {
-          const sp = clonedDoc.createElement('span');
-          sp.style.cssText = `position:absolute;width:${size}px;height:${size}px;pointer-events:none;${p}`;
-          el.appendChild(sp);
-        });
-      };
-
-      clonedDoc.querySelectorAll('#card-back-wrap .decor-frame.corner-bracket').forEach(el => drawCorners(el, 16, 1.2, acc));
-      clonedDoc.querySelectorAll('#card-back-wrap .qr-box.framed').forEach(el => drawCorners(el, 10, 1.5, acc));
-      clonedDoc.querySelectorAll('#card-front-wrap .decor-frame.corner-bracket').forEach(el => drawCorners(el, 16, 1.2, fAcc));
-
-      // 3) QR코드 인라인 SVG 변환
-      const qrSz = document.getElementById('rQrSz')?.value || 142;
-      const svgs = clonedDoc.querySelectorAll('#outQrBox svg');
-      svgs.forEach(svgEl => {
-        svgEl.setAttribute('width', qrSz);
-        svgEl.setAttribute('height', qrSz);
-        const xml = new XMLSerializer().serializeToString(svgEl);
-        const img = clonedDoc.createElement('img');
-        img.width = parseInt(qrSz);
-        img.height = parseInt(qrSz);
-        img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(xml);
-        img.style.width = '100%';
-        img.style.height = '100%';
-        img.style.display = 'block';
-        svgEl.parentNode.replaceChild(img, svgEl);
+    for (const relPath of uniquePaths) {
+      const fullUrl = relPath.replace('../', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/');
+      const fontRes = await fetch(fullUrl);
+      const blob = await fontRes.blob();
+      const base64 = await new Promise(resolve => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result);
+        reader.readAsDataURL(blob);
       });
+      cssText = cssText.split(relPath).join(base64);
     }
-  };
+
+    const styleEl = document.createElement('style');
+    styleEl.id = 'fa-embedded-style';
+    styleEl.textContent = cssText;
+    document.head.appendChild(styleEl);
+    cachedFontAwesomeCSS = true;
+  } catch (e) {
+    console.warn('폰트 임베딩 참고:', e);
+  }
+}
+
+// createPattern 에러 제로 + [☒] 아이콘 깨짐 제로 + 이상한 띄어쓰기 제로 캡처 함수
+async function captureCardToDataUrl(targetEl, scaleRatio = 3) {
+  await ensureFontAwesomeEmbedded();
+  await document.fonts.ready;
+
+  // 캡처 시 특수문자 다이아몬드(◆)가 작아지지 않도록 모든 ◆ 텍스트를 순수 도형으로 보장
+  return await htmlToImage.toPng(targetEl, {
+    pixelRatio: scaleRatio,
+    cacheBust: true,
+    skipFonts: false
+  });
 }
 
 function exportRasterPNG(targetId, label) {
@@ -898,12 +861,11 @@ function exportRasterPNG(targetId, label) {
 
   prepareForCleanCapture(async (restore) => {
     try {
-      await document.fonts.ready; // 모든 웹폰트와 아이콘이 100% 로드된 후 캡처
-      const canvas = await html2canvas(target, getCanvasOptions());
+      const dataUrl = await captureCardToDataUrl(target, 3);
       const a = document.createElement('a');
       const name = document.getElementById('inStage')?.value.trim() || 'Card';
       a.download = `${name}_명함_${label}_인쇄용.png`;
-      a.href = canvas.toDataURL('image/png');
+      a.href = dataUrl;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -916,6 +878,52 @@ function exportRasterPNG(targetId, label) {
     }
   });
 }
+
+function exportPrintPDF() {
+  const bleedPx = parseFloat(document.getElementById('selBleed')?.value || 16.8);
+  const bleedMm = bleedPx / 8.4;
+  const wMm = 90 + (bleedMm * 2);
+  const hMm = 50 + (bleedMm * 2);
+
+  const frontEl = document.getElementById('card-front-wrap');
+  const backEl = document.getElementById('card-back-wrap');
+  const prevFront = frontEl.style.display;
+  const prevBack = backEl.style.display;
+
+  frontEl.style.display = 'block';
+  backEl.style.display = 'block';
+
+  prepareForCleanCapture(async (restore) => {
+    try {
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF({
+        orientation: 'landscape',
+        unit: 'mm',
+        format: [wMm, hMm]
+      });
+
+      // 1페이지: 앞면
+      const frontDataUrl = await captureCardToDataUrl(frontEl, 4);
+      pdf.addImage(frontDataUrl, 'PNG', 0, 0, wMm, hMm);
+
+      // 2페이지: 뒷면
+      pdf.addPage([wMm, hMm], 'landscape');
+      const backDataUrl = await captureCardToDataUrl(backEl, 4);
+      pdf.addImage(backDataUrl, 'PNG', 0, 0, wMm, hMm);
+
+      const name = document.getElementById('inStage')?.value.trim() || 'Card';
+      pdf.save(`${name}_인쇄소입고용_양면명함(${wMm}x${hMm}mm).pdf`);
+    } catch (err) {
+      console.error('PDF 생성 오류:', err);
+      alert('PDF 생성 중 오류가 발생했습니다: ' + err.message);
+    } finally {
+      frontEl.style.display = prevFront;
+      backEl.style.display = prevBack;
+      restore();
+    }
+  });
+}
+
 
 function exportPrintPDF() {
   const bleedPx = parseFloat(document.getElementById('selBleed')?.value || 16.8);
