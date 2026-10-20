@@ -804,6 +804,8 @@ function prepareForCleanCapture(callback) {
   }, 150);
 }
 
+
+
 // FontAwesome 아이콘이 [☒]로 깨지지 않도록 폰트 파일까지 Base64로 내장시키는 캐시 함수
 let cachedFontAwesomeCSS = null;
 async function ensureFontAwesomeEmbedded() {
@@ -941,7 +943,6 @@ function exportPrintPDF() {
 
   prepareForCleanCapture(async (restore) => {
     try {
-      await document.fonts.ready;
       const { jsPDF } = window.jspdf;
       const pdf = new jsPDF({
         orientation: 'landscape',
@@ -949,16 +950,14 @@ function exportPrintPDF() {
         format: [wMm, hMm]
       });
 
-      const opts = getCanvasOptions();
-
       // 1페이지: 앞면
-      const canvasFront = await html2canvas(frontEl, opts);
-      pdf.addImage(canvasFront.toDataURL('image/png'), 'PNG', 0, 0, wMm, hMm);
+      const frontDataUrl = await captureCardToDataUrl(frontEl, 4);
+      pdf.addImage(frontDataUrl, 'PNG', 0, 0, wMm, hMm);
 
       // 2페이지: 뒷면
       pdf.addPage([wMm, hMm], 'landscape');
-      const canvasBack = await html2canvas(backEl, opts);
-      pdf.addImage(canvasBack.toDataURL('image/png'), 'PNG', 0, 0, wMm, hMm);
+      const backDataUrl = await captureCardToDataUrl(backEl, 4);
+      pdf.addImage(backDataUrl, 'PNG', 0, 0, wMm, hMm);
 
       const name = document.getElementById('inStage')?.value.trim() || 'Card';
       pdf.save(`${name}_인쇄소입고용_양면명함(${wMm}x${hMm}mm).pdf`);
@@ -972,6 +971,7 @@ function exportPrintPDF() {
     }
   });
 }
+
 
 
 
