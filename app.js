@@ -865,184 +865,37 @@ function getCanvasOptions() {
 }
 
 
+// 화면과 100% 동일하게 캡처하는 고해상도 PNG 내보내기 (선 실종 & 이상한 띄어쓰기 완벽 해결)
 function exportRasterPNG(targetId, label) {
   const target = document.getElementById(targetId);
   if (!target) return;
   const prevDisp = target.style.display;
   target.style.display = 'block';
 
-  prepareForCleanCapture((restore) => {
-    html2canvas(target, getCanvasOptions()).then(canvas => {
+  prepareForCleanCapture(async (restore) => {
+    try {
+      const dataUrl = await htmlToImage.toPng(target, {
+        pixelRatio: 3, // 3배수 초고해상도 인쇄 품질
+        cacheBust: true
+      });
       const a = document.createElement('a');
       const name = document.getElementById('inStage')?.value.trim() || 'Card';
       a.download = `${name}_명함_${label}_인쇄용.png`;
-      a.href = canvas.toDataURL('image/png');
+      a.href = dataUrl;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
-      target.style.display = prevDisp;
-      restore();
-    }).catch(err => {
+    } catch (err) {
       console.error('PNG 캡처 오류:', err);
+      alert('이미지 저장 중 오류가 발생했습니다: ' + err.message);
+    } finally {
       target.style.display = prevDisp;
       restore();
-    });
-  });
-}
-
-function escapeXml(unsafe) {
-  return (unsafe || '').replace(/[<>&'"]/g, c => {
-    switch (c) {
-      case '<': return '&lt;';
-      case '>': return '&gt;';
-      case '&': return '&amp;';
-      case '\'': return '&apos;';
-      case '"': return '&quot;';
     }
   });
 }
 
-// 순수 벡터 SVG 다운로드 (앞면 SVG + 뒷면 SVG 2개 파일 동시 출력)
-function exportPureVectorSVG() {
-  const bleedPx = parseFloat(document.getElementById('selBleed')?.value || 16.8);
-  const bleedMm = bleedPx / 8.4;
-  const totalW = 90 + (bleedMm * 2);
-  const totalH = 50 + (bleedMm * 2);
-
-  const bg = document.getElementById('cBg')?.value || '#ffffff';
-  const main = document.getElementById('cMain')?.value || '#161616';
-  const sub = document.getElementById('cSub')?.value || '#767676';
-  const acc = document.getElementById('cAcc')?.value || '#181818';
-
-  const padX = parseFloat(document.getElementById('rPadX')?.value || 56) / 8.4;
-  const padY = parseFloat(document.getElementById('rPadY')?.value || 50) / 8.4;
-  const leftRatio = parseFloat(document.getElementById('rLeftRatio')?.value || 56) / 100;
-  const divW = parseFloat(document.getElementById('rDivW')?.value || 1.2) / 8.4;
-  const divH = parseFloat(document.getElementById('rDivH')?.value || 92) / 100;
-  const qrMm = parseFloat(document.getElementById('rQrSz')?.value || 142) / 8.4;
-
-  const stageEn = document.getElementById('inStage')?.value.trim() || 'AIDEN KIM';
-  const stageKr = document.getElementById('inStageKr')?.value.trim() || '';
-  const real = document.getElementById('inReal')?.value.trim() || '';
-  const micro = document.getElementById('inMicroLabel')?.value.trim() || '';
-  const servicesLines = (document.getElementById('inServices')?.value || '').split('\n').filter(Boolean);
-  const handle = document.getElementById('inSocialHandle')?.value || '';
-  const stamp = document.getElementById('inTopStamp')?.value.trim() || '';
-
-  const x0 = bleedMm + padX;
-  const y0 = bleedMm + padY;
-  const innerH = 50 - (padY * 2);
-  const innerW = 90 - (padX * 2);
-  const divX = bleedMm + padX + (innerW * leftRatio);
-  const divLen = innerH * divH;
-  const divY1 = bleedMm + (50 - divLen) / 2;
-
-  const qrX = divX + ((90 - padX - (divX - bleedMm) - qrMm) / 2);
-  const qrY = bleedMm + (50 - qrMm - 4) / 2;
-  const qrInnerSvg = renderCustomQRSvgString()
-    .replace(/<svg [^>]+>/, `<svg x="${qrX}" y="${qrY}" width="${qrMm}" height="${qrMm}" viewBox="0 0 ${qrcode(0, 'M').getModuleCount || 25} ${qrcode(0, 'M').getModuleCount || 25}">`);
-
-  // QR SVG의 원래 viewBox 유지하며 위치/크기만 지정
-  const rawQr = renderCustomQRSvgString();
-  const vbMatch = rawQr.match(/viewBox="([^"]+)"/);
-  const vbAttr = vbMatch ? `viewBox="${vbMatch[1]}"` : '';
-  const pathMatch = rawQr.match(/<path [^>]+>/);
-  const pathTag = pathMatch ? pathMatch[0] : '';
-
-  // [1] 뒷면(Back) SVG 생성
-  let svgBack = `<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="${totalW}mm" height="${totalH}mm" viewBox="0 0 ${totalW} ${totalH}">
-  <rect x="0" y="0" width="${totalW}" height="${totalH}" fill="${bg}"/>\n`;
-
-  let curY = y0 + 1.5;
-  if (stamp) {
-    svgBack += `  <text x="${x0}" y="${curY}" fill="${sub}" opacity="0.7" font-family="monospace" font-size="1.05" font-weight="600" letter-spacing="0.18">◆ ${escapeXml(stamp)}</text>\n`;
-    curY += 3.2;
-  } else {
-    curY += 1.8;
-  }
-
-  svgBack += `  <text x="${x0}" y="${curY}" fill="${main}" font-family="Plus Jakarta Sans, Pretendard, sans-serif" font-size="3.0" font-weight="800">${escapeXml(stageEn)} <tspan font-size="2.0" font-weight="600">${escapeXml(stageKr)}</tspan></text>\n`;
-  if (real) {
-    curY += 2.2;
-    svgBack += `  <text x="${x0}" y="${curY}" fill="${sub}" font-family="Pretendard, sans-serif" font-size="1.5">${escapeXml(real)}</text>\n`;
-  }
-
-  curY += 3.2;
-  if (micro) {
-    svgBack += `  <text x="${x0}" y="${curY}" fill="${acc}" opacity="0.6" font-family="sans-serif" font-size="1.05" font-weight="700" letter-spacing="0.2">${escapeXml(micro)}</text>\n`;
-    curY += 2.2;
-  }
-
-  servicesLines.forEach((line, idx) => {
-    const formattedLine = line.split(/[,·/|]+/).map(s => s.trim()).filter(Boolean).join('  ◆  ');
-    svgBack += `  <text x="${x0}" y="${curY}" fill="${idx === 0 ? main : sub}" font-family="Pretendard, sans-serif" font-size="1.45" font-weight="${idx === 0 ? '500' : '400'}">${escapeXml(formattedLine)}</text>\n`;
-    curY += 2.2;
-  });
-
-  let conY = bleedMm + 50 - padY - ((contacts.length - 1) * 2.7);
-  contacts.forEach(c => {
-    svgBack += `  <text x="${x0}" y="${conY}" fill="${main}" font-family="Plus Jakarta Sans, Pretendard, sans-serif" font-size="1.5">${escapeXml(c.text)}</text>\n`;
-    conY += 2.7;
-  });
-
-  svgBack += `  <line x1="${divX}" y1="${divY1}" x2="${divX}" y2="${divY1 + divLen}" stroke="${acc}" stroke-width="${divW}"/>\n`;
-  svgBack += `  <text x="${divX}" y="${bleedMm + 25.3}" text-anchor="middle" fill="${acc}" font-size="1.2">◆</text>\n`;
-  svgBack += `  <svg x="${qrX}" y="${qrY}" width="${qrMm}" height="${qrMm}" ${vbAttr} shape-rendering="crispEdges">${pathTag}</svg>\n`;
-
-  const rightCenterX = divX + ((bleedMm + 90 - padX - divX) / 2);
-  svgBack += `  <text x="${rightCenterX}" y="${qrY + qrMm + 3.5}" text-anchor="middle" fill="${main}" font-family="Plus Jakarta Sans, sans-serif" font-size="1.45">${escapeXml(handle)}</text>\n`;
-
-  if (bleedMm > 0) {
-    svgBack += `  <g id="Trim_Guide_Layer" opacity="0.35"><rect x="${bleedMm}" y="${bleedMm}" width="90" height="50" fill="none" stroke="#ff0000" stroke-width="0.1" stroke-dasharray="1,1"/></g>\n`;
-  }
-  svgBack += `</svg>`;
-
-  // [2] 앞면(Front) SVG 생성
-  const fBg = getComputedStyle(document.documentElement).getPropertyValue('--f-card-bg').trim() || bg;
-  const fMain = getComputedStyle(document.documentElement).getPropertyValue('--f-text-main').trim() || main;
-  const fSub = getComputedStyle(document.documentElement).getPropertyValue('--f-text-sub').trim() || sub;
-  const fAcc = getComputedStyle(document.documentElement).getPropertyValue('--f-accent').trim() || acc;
-  const fTitle = document.getElementById('inFrontMainText')?.value.trim() || stageEn;
-  const fSubTxt = document.getElementById('inFrontSubText')?.value.trim() || '';
-  const cx = totalW / 2;
-  const cy = totalH / 2;
-
-  let svgFront = `<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="${totalW}mm" height="${totalH}mm" viewBox="0 0 ${totalW} ${totalH}">
-  <rect x="0" y="0" width="${totalW}" height="${totalH}" fill="${fBg}"/>
-  <g transform="translate(${cx}, ${cy - 4})">
-    <rect x="-4" y="-4" width="8" height="8" fill="none" stroke="${fAcc}" stroke-width="0.25" transform="rotate(45)"/>
-    <text x="0" y="0.9" text-anchor="middle" fill="${fMain}" font-family="Plus Jakarta Sans, sans-serif" font-size="2.6" font-weight="800">${escapeXml(fTitle.substring(0, 2).toUpperCase())}</text>
-  </g>
-  <text x="${cx}" y="${bleedMm + 50 - padY - 4.5}" text-anchor="middle" fill="${fMain}" font-family="Plus Jakarta Sans, Pretendard, sans-serif" font-size="2.0" font-weight="700" letter-spacing="0.35">${escapeXml(fTitle)}</text>
-  <text x="${cx}" y="${bleedMm + 50 - padY - 2.0}" text-anchor="middle" fill="${fSub}" font-family="Plus Jakarta Sans, Pretendard, sans-serif" font-size="1.25" letter-spacing="0.25">${escapeXml(fSubTxt)}</text>
-  <text x="${cx}" y="${bleedMm + 50 - padY + 0.5}" text-anchor="middle" fill="${fAcc}" font-size="1.0">── ◆ ──</text>
-`;
-  if (bleedMm > 0) {
-    svgFront += `  <g id="Trim_Guide_Layer" opacity="0.35"><rect x="${bleedMm}" y="${bleedMm}" width="90" height="50" fill="none" stroke="#ff0000" stroke-width="0.1" stroke-dasharray="1,1"/></g>\n`;
-  }
-  svgFront += `</svg>`;
-
-  // 뒷면 & 앞면 SVG 순차 다운로드
-  downloadSvgBlob(svgBack, `${stageEn}_명함_뒷면_순수벡터(${totalW}x${totalH}mm).svg`);
-  setTimeout(() => {
-    downloadSvgBlob(svgFront, `${stageEn}_명함_앞면_순수벡터(${totalW}x${totalH}mm).svg`);
-  }, 300);
-}
-
-function downloadSvgBlob(content, filename) {
-  const blob = new Blob([content], { type: 'image/svg+xml;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-}
-
-// 인쇄소 입고용 양면 PDF 내보내기 (1페이지: 앞면, 2페이지: 뒷면)
+// 인쇄소 입고용 양면 PDF 내보내기 (화면과 100% 동일한 렌더링)
 function exportPrintPDF() {
   const bleedPx = parseFloat(document.getElementById('selBleed')?.value || 16.8);
   const bleedMm = bleedPx / 8.4;
@@ -1066,17 +919,19 @@ function exportPrintPDF() {
         format: [wMm, hMm]
       });
 
-      const opts = getCanvasOptions();
-      opts.scale = 4; // 인쇄급 초고해상도
+      const captureOpts = {
+        pixelRatio: 4, // 인쇄용 4배수 초고해상도
+        cacheBust: true
+      };
 
-      // 1페이지: 앞면
-      const canvasFront = await html2canvas(frontEl, opts);
-      pdf.addImage(canvasFront.toDataURL('image/png'), 'PNG', 0, 0, wMm, hMm);
+      // 1페이지: 앞면 캡처
+      const frontDataUrl = await htmlToImage.toPng(frontEl, captureOpts);
+      pdf.addImage(frontDataUrl, 'PNG', 0, 0, wMm, hMm);
 
-      // 2페이지: 뒷면
+      // 2페이지: 뒷면 캡처
       pdf.addPage([wMm, hMm], 'landscape');
-      const canvasBack = await html2canvas(backEl, opts);
-      pdf.addImage(canvasBack.toDataURL('image/png'), 'PNG', 0, 0, wMm, hMm);
+      const backDataUrl = await htmlToImage.toPng(backEl, captureOpts);
+      pdf.addImage(backDataUrl, 'PNG', 0, 0, wMm, hMm);
 
       const name = document.getElementById('inStage')?.value.trim() || 'Card';
       pdf.save(`${name}_인쇄소입고용_양면명함(${wMm}x${hMm}mm).pdf`);
@@ -1090,6 +945,7 @@ function exportPrintPDF() {
     }
   });
 }
+
 
 
 // ================= 앞면(Front) 로고 업로드 및 렌더링 =================
