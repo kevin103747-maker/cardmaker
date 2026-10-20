@@ -966,3 +966,98 @@ input[type="range"] {
   background: var(--accent);
   z-index: 1;
 }
+/* ================= 슬라이더 개별 초기화 아이콘 & 신규 디자인 디테일 ================= */
+.sl-reset {
+  cursor: pointer;
+  color: #64748b;
+  font-size: 10px;
+  margin-left: 4px;
+  transition: color 0.15s, transform 0.2s;
+}
+.sl-reset:hover {
+  color: #e2e8f0;
+  transform: rotate(-45deg);
+}
+
+/* 1) 이름 하단 포인트 악센트 룰 (Name Accent Rule) */
+.decor-name-rule {
+  margin-top: 2px;
+  margin-bottom: 10px;
+  display: none;
+}
+.decor-name-rule.short {
+  display: block;
+  width: 32px;
+  height: 1.8px;
+  background-color: var(--accent);
+  opacity: 0.85;
+}
+.decor-name-rule.full {
+  display: block;
+  width: 100%;
+  height: 0.8px;
+  background: linear-gradient(to right, var(--accent) 40%, transparent 100%);
+  opacity: 0.35;
+}
+.decor-name-rule.dot-line {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.decor-name-rule.dot-line::before {
+  content: "";
+  width: 28px;
+  height: 1.2px;
+  background-color: var(--accent);
+  opacity: 0.7;
+}
+.decor-name-rule.dot-line::after {
+  content: "•";
+  font-size: 9px;
+  line-height: 1;
+  color: var(--accent);
+  opacity: 0.7;
+}
+
+/* 2) QR 상단 캡션 태그 (SCAN TO LISTEN ↗) */
+.qr-caption-tag {
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: 1.8px;
+  color: var(--accent);
+  opacity: 0.65;
+  margin-bottom: 7px;
+  text-transform: uppercase;
+}
+
+.qr-box.soft-box {
+  padding: 9px;
+  border: 1px solid rgba(128, 128, 128, 0.28);
+  border-radius: 8px;
+}
+
+/* 3) 배경 소프트 앰비언트 스튜디오 라이트 */
+.decor-bg-pattern.glow {
+  opacity: 0.08;
+  background:
+    radial-gradient(circle at 12% 18%, var(--accent) 0%, transparent 48%),
+    radial-gradient(circle at 88% 85%, var(--accent) 0%, transparent 45%);
+}
+
+/* 4) 우측 가장자리 세로 시리얼 인덱스 (LP 재킷/에디토리얼 감성) */
+.decor-side-index {
+  position: absolute;
+  right: 9px;
+  top: 50%;
+  transform: translateY(-50%) rotate(90deg);
+  transform-origin: center;
+  font-size: 7.5px;
+  font-family: monospace;
+  font-weight: 600;
+  letter-spacing: 2.2px;
+  color: var(--text-sub);
+  opacity: 0.42;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 2;
+}

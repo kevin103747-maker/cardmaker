@@ -289,28 +289,67 @@ function isFinderPattern(r, c, count) {
   return false;
 }
 
+// [추가] 개별 슬라이더 초기화 & 50:50 정중앙 대칭 맞춤 함수
+function resetSingleSlider(id, defaultVal) {
+  const el = document.getElementById(id);
+  if (el) {
+    el.value = defaultVal;
+    updateLayoutVars();
+  }
+}
+
+function centerAlignLayout() {
+  document.getElementById('rLeftRatio').value = 50; // 좌우 정확히 50:50 대칭
+  document.getElementById('rPadX').value = 56;
+  document.getElementById('rPadY').value = 50;
+  document.getElementById('rDivGap').value = 38;
+  document.getElementById('rDivH').value = 90;
+  updateLayoutVars();
+}
+
+function resetLayoutVars() {
+  document.getElementById('rPadY').value = 50;
+  document.getElementById('rPadX').value = 56;
+  document.getElementById('rLeftRatio').value = 56;
+  document.getElementById('rDivGap').value = 38;
+  document.getElementById('rDivW').value = 1.2;
+  document.getElementById('rDivH').value = 92;
+  document.getElementById('rNameSz').value = 24;
+  document.getElementById('rNameTrk').value = -0.5;
+  document.getElementById('rConGap').value = 11;
+  document.getElementById('rQrSz').value = 142;
+  updateLayoutVars();
+}
+
+function resetIconOffsets(target) {
+  if (!target || target === 'c') {
+    const c = document.getElementById('rCIconY');
+    if (c) c.value = 0;
+  }
+  if (!target || target === 's') {
+    const s = document.getElementById('rSIconY');
+    if (s) s.value = 0;
+  }
+  updateDecorations();
+}
+
+// 5. 커스텀 QR코드 엔진 (내부 심볼 제거로 스캔 인식률 & 밀도 최적화)
 function renderCustomQRSvgString() {
   const url = document.getElementById('inQrUrl').value.trim() || 'https://example.com';
   const acc = document.getElementById('cAcc').value;
-  const bg = document.getElementById('cBg').value;
   const modStyle = document.getElementById('selQrModule').value;
   const eyeStyle = document.getElementById('selQrEye').value;
-  const logoType = document.getElementById('selQrLogo').value;
 
-  const qr = qrcode(0, 'H');
+  const qr = qrcode(0, 'M'); // 깔끔한 밀도를 위해 M 레벨 사용
   qr.addData(url);
   qr.make();
   const count = qr.getModuleCount();
-
-  const centerStart = Math.floor(count * 0.36);
-  const centerEnd = Math.ceil(count * 0.64);
 
   let svg = `<svg viewBox="0 0 ${count} ${count}" xmlns="http://www.w3.org/2000/svg">`;
 
   for (let r = 0; r < count; r++) {
     for (let c = 0; c < count; c++) {
       if (isFinderPattern(r, c, count)) continue;
-      if (logoType !== 'none' && r >= centerStart && r < centerEnd && c >= centerStart && c < centerEnd) continue;
 
       if (qr.isDark(r, c)) {
         if (modStyle === 'dots') {
@@ -343,22 +382,6 @@ function renderCustomQRSvgString() {
     }
   });
 
-  if (logoType !== 'none') {
-    const mid = count / 2;
-    const boxSize = (centerEnd - centerStart);
-    svg += `<rect x="${centerStart + 0.2}" y="${centerStart + 0.2}" width="${boxSize - 0.4}" height="${boxSize - 0.4}" rx="1.8" fill="${bg}" stroke="${acc}" stroke-width="0.65"/>`;
-
-    let symbol = '♫';
-    if (logoType === 'play') symbol = '▶';
-    else if (logoType === 'star') symbol = '★';
-    else if (logoType === 'initial') {
-      const st = document.getElementById('inStage').value.trim();
-      symbol = st ? st.charAt(0).toUpperCase() : 'A';
-    }
-
-    svg += `<text x="${mid}" y="${mid + (boxSize * 0.22)}" text-anchor="middle" fill="${acc}" font-size="${boxSize * 0.58}" font-weight="700" font-family="sans-serif">${symbol}</text>`;
-  }
-
   svg += `</svg>`;
   return svg;
 }
@@ -387,7 +410,6 @@ function renderCardContent() {
   const socialHandle = document.getElementById('inSocialHandle')?.value || '';
   const socialStyle = document.getElementById('selSocialStyle')?.value || 'solid';
 
-  // 앞면
   document.getElementById('outFrontStage').textContent = stageEn;
   const fReal = document.getElementById('outFrontReal');
   const frontSubParts = [stageKr, real].filter(Boolean).join(' · ');
@@ -395,7 +417,6 @@ function renderCardContent() {
   fReal.style.display = frontSubParts ? 'inline' : 'none';
   document.getElementById('outFrontRole').textContent = frontRole;
 
-  // 뒷면 3중 이름
   const nameGroup = document.getElementById('outBackNameGroup');
   let nameHtml = '';
 
@@ -424,12 +445,10 @@ function renderCardContent() {
   }
   nameGroup.innerHTML = nameHtml;
 
-  // 마이크로 캡션
   const microEl = document.getElementById('outMicroLabel');
   microEl.textContent = microLabel;
   microEl.style.display = microLabel ? 'block' : 'none';
 
-  // 서비스 목록
   const sContainer = document.getElementById('outServicesContainer');
   sContainer.innerHTML = '';
   if (serviceMode === 'text') {
@@ -449,7 +468,6 @@ function renderCardContent() {
     sContainer.appendChild(wrap);
   }
 
-  // 연락처
   const cList = document.getElementById('outContactList');
   cList.innerHTML = '';
   contacts.forEach(c => {
@@ -465,7 +483,6 @@ function renderCardContent() {
     cList.appendChild(row);
   });
 
-  // 소셜 바
   const hEl = document.getElementById('outSocialHandle');
   hEl.textContent = socialHandle;
   hEl.style.display = socialHandle.trim() ? 'inline-flex' : 'none';
@@ -479,13 +496,10 @@ function renderCardContent() {
     sBox.appendChild(b);
   });
 
-  if (document.getElementById('selQrLogo')?.value === 'initial') {
-    renderCustomQR();
-  }
   saveStateToLocal();
 }
 
-// 7. 아이콘 세로 영점 조절 & 그래픽 꾸미기 요소 반영
+// 7. 아이콘 세로 영점 조절 & 하이엔드 디자인 디테일 반영
 function updateDecorations() {
   const cOff = document.getElementById('rCIconY')?.value || 0;
   const sOff = document.getElementById('rSIconY')?.value || 0;
@@ -494,35 +508,58 @@ function updateDecorations() {
   document.documentElement.style.setProperty('--c-icon-offset-y', cOff + 'px');
   document.documentElement.style.setProperty('--s-icon-offset-y', sOff + 'px');
 
-  const wm = document.getElementById('selWatermark')?.value || 'none';
+  const nameRule = document.getElementById('selNameRule')?.value || 'short';
+  const qrCaption = document.getElementById('selQrCaption')?.value || 'SCAN TO LISTEN ↗';
   const divStyle = document.getElementById('selDivStyle')?.value || 'solid';
   const frameStyle = document.getElementById('selFrameStyle')?.value || 'none';
-  const bgPat = document.getElementById('selBgPattern')?.value || 'none';
+  const bgPat = document.getElementById('selBgPattern')?.value || 'glow';
   const qrFrame = document.getElementById('selQrFrame')?.value || 'framed';
   const widget = document.getElementById('selMusicWidget')?.value || 'player';
   const stampText = document.getElementById('inTopStamp')?.value.trim() || '';
+  const sideIdxText = document.getElementById('inSideIndex')?.value.trim() || '';
 
-  const wmEl = document.getElementById('outWatermark');
-  if (wmEl) wmEl.innerHTML = wm === 'none' ? '' : `<i class="${wm}"></i>`;
+  // 이름 하단 포인트 룰
+  const ruleEl = document.getElementById('outNameRule');
+  if (ruleEl) ruleEl.className = 'decor-name-rule' + (nameRule !== 'none' ? ' ' + nameRule : '');
 
+  // QR 상단 캡션 태그
+  const capEl = document.getElementById('outQrCaption');
+  if (capEl) {
+    capEl.textContent = qrCaption === 'none' ? '' : qrCaption;
+    capEl.style.display = qrCaption === 'none' ? 'none' : 'block';
+  }
+
+  // 세로선 스타일
   const divEl = document.getElementById('outDividerLine');
   if (divEl) divEl.className = 'back-divider-line' + (divStyle !== 'solid' ? ' ' + divStyle : '');
 
+  // 외곽 프레임
   const frameEl = document.getElementById('outDecorFrame');
   if (frameEl) frameEl.className = 'decor-frame' + (frameStyle !== 'none' ? ' ' + frameStyle : '');
 
+  // 배경 패턴 & 스튜디오 조명
   const patEl = document.getElementById('outBgPattern');
   if (patEl) patEl.className = 'decor-bg-pattern' + (bgPat !== 'none' ? ' ' + bgPat : '');
 
+  // QR 프레임
   const qrEl = document.getElementById('outQrBox');
-  if (qrEl) qrEl.className = 'qr-box' + (qrFrame === 'framed' ? ' framed' : '');
+  if (qrEl) qrEl.className = 'qr-box' + (qrFrame !== 'none' ? ' ' + qrFrame : '');
 
+  // 상단 스튜디오 스탬프
   const stEl = document.getElementById('outTopStamp');
   if (stEl) {
     stEl.textContent = stampText;
     stEl.className = 'decor-top-stamp' + (stampText ? ' active' : '');
   }
 
+  // 우측 엣지 세로 인덱스
+  const sideEl = document.getElementById('outSideIndex');
+  if (sideEl) {
+    sideEl.textContent = sideIdxText;
+    sideEl.style.display = sideIdxText ? 'block' : 'none';
+  }
+
+  // 뮤직 그래픽 위젯
   const wEl = document.getElementById('outMusicWidget');
   if (wEl) {
     if (widget === 'player') {
@@ -550,7 +587,7 @@ function updateDecorations() {
   saveStateToLocal();
 }
 
-// 8. 자동 저장 및 JSON 프리셋 입출력 (신규 필드 완벽 포함)
+// 8. 자동 저장 및 JSON 프리셋 입출력
 function collectCurrentState() {
   const g = id => document.getElementById(id)?.value;
   return {
@@ -583,18 +620,19 @@ function collectCurrentState() {
     inQrUrl: g('inQrUrl'),
     selQrModule: g('selQrModule'),
     selQrEye: g('selQrEye'),
-    selQrLogo: g('selQrLogo'),
+    selQrCaption: g('selQrCaption'),
     inSocialHandle: g('inSocialHandle'),
     selSocialStyle: g('selSocialStyle'),
     rCIconY: g('rCIconY'),
     rSIconY: g('rSIconY'),
+    selNameRule: g('selNameRule'),
     selMusicWidget: g('selMusicWidget'),
     selQrFrame: g('selQrFrame'),
     selBgPattern: g('selBgPattern'),
-    selWatermark: g('selWatermark'),
     selDivStyle: g('selDivStyle'),
     selFrameStyle: g('selFrameStyle'),
     inTopStamp: g('inTopStamp'),
+    inSideIndex: g('inSideIndex'),
     contacts: contacts,
     socials: socials
   };

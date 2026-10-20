@@ -102,47 +102,53 @@
         </div>
       </div>
 
-      <!-- 3. 세로선 및 여백 · 비례 세부 조절 -->
+      <!-- 3. 세로선 및 여백 · 비례 세부 조절 (개별 리셋 & 중앙맞춤 추가) -->
       <div class="panel-box">
-        <div class="panel-title">3. 세로선 · 여백 · 레이아웃 미세 조절</div>
+        <div class="panel-title">
+          <span>3. 세로선 · 여백 · 레이아웃 조절</span>
+          <div style="display:flex; gap:4px;">
+            <button class="btn-xs" onclick="centerAlignLayout()" title="좌우 50:50 정중앙 대칭 맞춤"><i class="fa-solid fa-align-center"></i> 50:50 중앙맞춤</button>
+            <button class="btn-xs" onclick="resetLayoutVars()" title="레이아웃 수치 전체 기본값"><i class="fa-solid fa-rotate-left"></i> 기본값</button>
+          </div>
+        </div>
         <div class="grid-2">
           <div>
-            <label class="lbl"><span>상하 여백 (Y)</span><span class="val-badge" id="vPadY">50px</span></label>
-            <input type="range" id="rPadY" min="32" max="68" value="50" oninput="updateLayoutVars()">
+            <label class="lbl"><span>상하 여백 (Y)</span><span><span class="val-badge" id="vPadY">50px</span> <i class="fa-solid fa-rotate-left sl-reset" onclick="resetSingleSlider('rPadY', 50)"></i></span></label>
+            <input type="range" id="rPadY" min="32" max="68" value="50" ondblclick="resetSingleSlider('rPadY', 50)" oninput="updateLayoutVars()">
           </div>
           <div>
-            <label class="lbl"><span>좌우 여백 (X)</span><span class="val-badge" id="vPadX">56px</span></label>
-            <input type="range" id="rPadX" min="36" max="76" value="56" oninput="updateLayoutVars()">
+            <label class="lbl"><span>좌우 여백 (X)</span><span><span class="val-badge" id="vPadX">56px</span> <i class="fa-solid fa-rotate-left sl-reset" onclick="resetSingleSlider('rPadX', 56)"></i></span></label>
+            <input type="range" id="rPadX" min="36" max="76" value="56" ondblclick="resetSingleSlider('rPadX', 56)" oninput="updateLayoutVars()">
           </div>
           <div>
-            <label class="lbl"><span>좌측 영역 폭 비율</span><span class="val-badge" id="vLeftRatio">56%</span></label>
-            <input type="range" id="rLeftRatio" min="45" max="66" value="56" oninput="updateLayoutVars()">
+            <label class="lbl"><span>좌측 영역 폭 비율</span><span><span class="val-badge" id="vLeftRatio">56%</span> <i class="fa-solid fa-rotate-left sl-reset" onclick="resetSingleSlider('rLeftRatio', 50)" title="50% 중앙으로"></i></span></label>
+            <input type="range" id="rLeftRatio" min="40" max="66" value="56" ondblclick="resetSingleSlider('rLeftRatio', 50)" oninput="updateLayoutVars()">
           </div>
           <div>
-            <label class="lbl"><span>세로선 좌우 간격</span><span class="val-badge" id="vDivGap">38px</span></label>
-            <input type="range" id="rDivGap" min="20" max="56" value="38" oninput="updateLayoutVars()">
+            <label class="lbl"><span>세로선 좌우 간격</span><span><span class="val-badge" id="vDivGap">38px</span> <i class="fa-solid fa-rotate-left sl-reset" onclick="resetSingleSlider('rDivGap', 38)"></i></span></label>
+            <input type="range" id="rDivGap" min="20" max="56" value="38" ondblclick="resetSingleSlider('rDivGap', 38)" oninput="updateLayoutVars()">
           </div>
           <div>
-            <label class="lbl"><span>세로선 두께</span><span class="val-badge" id="vDivW">1.2px</span></label>
-            <input type="range" id="rDivW" min="0.5" max="3.0" step="0.1" value="1.2" oninput="updateLayoutVars()">
+            <label class="lbl"><span>세로선 두께</span><span><span class="val-badge" id="vDivW">1.2px</span> <i class="fa-solid fa-rotate-left sl-reset" onclick="resetSingleSlider('rDivW', 1.2)"></i></span></label>
+            <input type="range" id="rDivW" min="0.5" max="3.0" step="0.1" value="1.2" ondblclick="resetSingleSlider('rDivW', 1.2)" oninput="updateLayoutVars()">
           </div>
           <div>
-            <label class="lbl"><span>세로선 길이 (높이)</span><span class="val-badge" id="vDivH">92%</span></label>
-            <input type="range" id="rDivH" min="50" max="100" value="92" oninput="updateLayoutVars()">
+            <label class="lbl"><span>세로선 길이 (높이)</span><span><span class="val-badge" id="vDivH">92%</span> <i class="fa-solid fa-rotate-left sl-reset" onclick="resetSingleSlider('rDivH', 92)"></i></span></label>
+            <input type="range" id="rDivH" min="50" max="100" value="92" ondblclick="resetSingleSlider('rDivH', 92)" oninput="updateLayoutVars()">
           </div>
         </div>
         <div class="grid-3" style="margin-bottom:0;">
           <div>
-            <label class="lbl"><span>이름 크기</span><span class="val-badge" id="vNameSz">24px</span></label>
-            <input type="range" id="rNameSz" min="18" max="32" value="24" oninput="updateLayoutVars()">
+            <label class="lbl"><span>이름 크기</span><span><span class="val-badge" id="vNameSz">24px</span> <i class="fa-solid fa-rotate-left sl-reset" onclick="resetSingleSlider('rNameSz', 24)"></i></span></label>
+            <input type="range" id="rNameSz" min="18" max="32" value="24" ondblclick="resetSingleSlider('rNameSz', 24)" oninput="updateLayoutVars()">
           </div>
           <div>
-            <label class="lbl"><span>이름 자간</span><span class="val-badge" id="vNameTrk">-0.5px</span></label>
-            <input type="range" id="rNameTrk" min="-2.0" max="3.0" step="0.1" value="-0.5" oninput="updateLayoutVars()">
+            <label class="lbl"><span>이름 자간</span><span><span class="val-badge" id="vNameTrk">-0.5px</span> <i class="fa-solid fa-rotate-left sl-reset" onclick="resetSingleSlider('rNameTrk', -0.5)"></i></span></label>
+            <input type="range" id="rNameTrk" min="-2.0" max="3.0" step="0.1" value="-0.5" ondblclick="resetSingleSlider('rNameTrk', -0.5)" oninput="updateLayoutVars()">
           </div>
           <div>
-            <label class="lbl"><span>연락처 간격</span><span class="val-badge" id="vConGap">11px</span></label>
-            <input type="range" id="rConGap" min="6" max="18" value="11" oninput="updateLayoutVars()">
+            <label class="lbl"><span>연락처 간격</span><span><span class="val-badge" id="vConGap">11px</span> <i class="fa-solid fa-rotate-left sl-reset" onclick="resetSingleSlider('rConGap', 11)"></i></span></label>
+            <input type="range" id="rConGap" min="6" max="18" value="11" ondblclick="resetSingleSlider('rConGap', 11)" oninput="updateLayoutVars()">
           </div>
         </div>
       </div>
@@ -225,7 +231,7 @@ Vocal Directing & Mixing, Mastering</textarea>
         <div id="contactSortableList" class="sortable-list"></div>
       </div>
 
-      <!-- 6. QR코드 커스텀 & 소셜 아이콘 -->
+      <!-- 6. QR코드 커스텀 (내부 심볼 제거로 인식률 & 미니멀리즘 극대화) & 소셜 아이콘 -->
       <div class="panel-box">
         <div class="panel-title">6. QR코드 커스텀 & 소셜 아이콘</div>
         <div class="field-row">
@@ -250,19 +256,18 @@ Vocal Directing & Mixing, Mastering</textarea>
             </select>
           </div>
           <div>
-            <label class="lbl">QR 중앙 심볼</label>
-            <select id="selQrLogo" class="inp" onchange="renderCustomQR()">
-              <option value="none">없음 (기본)</option>
-              <option value="music" selected>음표 (♫)</option>
-              <option value="play">플레이 (▶)</option>
-              <option value="star">스타 (★)</option>
-              <option value="initial">예명 첫 글자</option>
+            <label class="lbl">QR 상단 캡션 태그</label>
+            <select id="selQrCaption" class="inp" onchange="updateDecorations()">
+              <option value="SCAN TO LISTEN ↗" selected>SCAN TO LISTEN ↗</option>
+              <option value="PORTFOLIO & TRACKS">PORTFOLIO & TRACKS</option>
+              <option value="OFFICIAL LINKS ↗">OFFICIAL LINKS ↗</option>
+              <option value="none">캡션 없음</option>
             </select>
           </div>
         </div>
         <div class="field-row">
-          <label class="lbl"><span>QR코드 크기</span><span class="val-badge" id="vQrSz">146px</span></label>
-          <input type="range" id="rQrSz" min="110" max="175" value="146" oninput="updateLayoutVars()">
+          <label class="lbl"><span>QR코드 크기</span><span><span class="val-badge" id="vQrSz">142px</span> <i class="fa-solid fa-rotate-left sl-reset" onclick="resetSingleSlider('rQrSz', 142)"></i></span></label>
+          <input type="range" id="rQrSz" min="110" max="170" value="142" ondblclick="resetSingleSlider('rQrSz', 142)" oninput="updateLayoutVars()">
         </div>
         <div class="grid-2" style="margin-top:10px;">
           <div>
@@ -287,24 +292,36 @@ Vocal Directing & Mixing, Mastering</textarea>
         </div>
       </div>
 
-      <!-- 7. 아이콘 세로 영점 조절 & 고급 꾸밈 요소 -->
+      <!-- 7. 아이콘 위치 영점조절 & 하이엔드 디자인 디테일 -->
       <div class="panel-box">
-        <div class="panel-title">7. 아이콘 위치 영점조절 & 그래픽 꾸미기</div>
+        <div class="panel-title">
+          <span>7. 아이콘 영점조절 & 에디토리얼 디테일</span>
+          <button class="btn-xs" onclick="resetIconOffsets()" title="아이콘 세로 위치 0px 정중앙 초기화"><i class="fa-solid fa-arrows-to-dot"></i> 아이콘 중앙맞춤</button>
+        </div>
         <div class="grid-2">
           <div>
-            <label class="lbl"><span>좌측 연락처 아이콘 높이</span><span class="val-badge" id="vCIconY">0px</span></label>
-            <input type="range" id="rCIconY" min="-5" max="5" step="0.5" value="0" oninput="updateDecorations()">
+            <label class="lbl"><span>좌측 연락처 아이콘 높이</span><span><span class="val-badge" id="vCIconY">0px</span> <i class="fa-solid fa-rotate-left sl-reset" onclick="resetIconOffsets('c')"></i></span></label>
+            <input type="range" id="rCIconY" min="-5" max="5" step="0.5" value="0" ondblclick="resetIconOffsets('c')" oninput="updateDecorations()">
           </div>
           <div>
-            <label class="lbl"><span>우측 소셜 아이콘 높이</span><span class="val-badge" id="vSIconY">0px</span></label>
-            <input type="range" id="rSIconY" min="-5" max="5" step="0.5" value="0" oninput="updateDecorations()">
+            <label class="lbl"><span>우측 소셜 아이콘 높이</span><span><span class="val-badge" id="vSIconY">0px</span> <i class="fa-solid fa-rotate-left sl-reset" onclick="resetIconOffsets('s')"></i></span></label>
+            <input type="range" id="rSIconY" min="-5" max="5" step="0.5" value="0" ondblclick="resetIconOffsets('s')" oninput="updateDecorations()">
           </div>
         </div>
         <div class="grid-2">
           <div>
+            <label class="lbl">이름 하단 포인트 라인 (Name Rule)</label>
+            <select id="selNameRule" class="inp" onchange="updateDecorations()">
+              <option value="none">없음 (기본 여백)</option>
+              <option value="short" selected>모던 숏 액센트 바 (32px)</option>
+              <option value="dot-line">타이포그래피 도트 라인 (── •)</option>
+              <option value="full">전체 얇은 구분선</option>
+            </select>
+          </div>
+          <div>
             <label class="lbl">뮤직 그래픽 위젯 (서비스 하단)</label>
             <select id="selMusicWidget" class="inp" onchange="updateDecorations()">
-              <option value="player" selected>미니 뮤직 플레이어 바 (추천)</option>
+              <option value="player" selected>미니 뮤직 플레이어 바</option>
               <option value="wave">오디오 사운드웨이브 파형</option>
               <option value="piano">미니멀 피아노 건반 심볼</option>
               <option value="none">없음</option>
@@ -313,27 +330,19 @@ Vocal Directing & Mixing, Mastering</textarea>
           <div>
             <label class="lbl">QR코드 외곽 프레임</label>
             <select id="selQrFrame" class="inp" onchange="updateDecorations()">
-              <option value="framed" selected>뷰파인더 코너 브래킷 (추천)</option>
-              <option value="none">프레임 없음 (기본)</option>
+              <option value="framed" selected>뷰파인더 코너 브래킷</option>
+              <option value="soft-box">라운드 보더 박스</option>
+              <option value="none">프레임 없음</option>
             </select>
           </div>
           <div>
-            <label class="lbl">배경 패턴 (전체 은은한 질감)</label>
+            <label class="lbl">배경 텍스처 & 스튜디오 조명</label>
             <select id="selBgPattern" class="inp" onchange="updateDecorations()">
-              <option value="none">없음 (무지)</option>
-              <option value="dots" selected>엔지니어링 도트 매트릭스</option>
+              <option value="none">없음 (플랫 무지)</option>
+              <option value="glow" selected>소프트 앰비언트 라이트 (은은한 입체감)</option>
+              <option value="dots">엔지니어링 도트 매트릭스</option>
               <option value="grid">스튜디오 모눈 그리드</option>
               <option value="staff">하단 미니멀 오선지 라인</option>
-            </select>
-          </div>
-          <div>
-            <label class="lbl">좌측 배경 워터마크 (QR 간섭 없음)</label>
-            <select id="selWatermark" class="inp" onchange="updateDecorations()">
-              <option value="none">없음</option>
-              <option value="fa-solid fa-compact-disc" selected>바이닐 LP 레코드</option>
-              <option value="fa-solid fa-sliders">콘솔 페이더</option>
-              <option value="fa-solid fa-headphones">스튜디오 헤드폰</option>
-              <option value="fa-solid fa-music">음표 심볼</option>
             </select>
           </div>
           <div>
@@ -346,7 +355,7 @@ Vocal Directing & Mixing, Mastering</textarea>
             </select>
           </div>
           <div>
-            <label class="lbl">외곽 테두리 장식</label>
+            <label class="lbl">외곽 에디토리얼 프레임</label>
             <select id="selFrameStyle" class="inp" onchange="updateDecorations()">
               <option value="none">없음</option>
               <option value="corner-bracket" selected>네 모서리 ㄱ자 포커스</option>
@@ -354,9 +363,15 @@ Vocal Directing & Mixing, Mastering</textarea>
             </select>
           </div>
         </div>
-        <div class="field-row" style="margin-top:6px;">
-          <label class="lbl">상단 스튜디오 메타 스탬프 (비워두면 숨김)</label>
-          <input type="text" id="inTopStamp" class="inp" value="STUDIO MASTER // 24BIT 96KHZ" oninput="updateDecorations()">
+        <div class="grid-2" style="margin-bottom:0; margin-top:6px;">
+          <div>
+            <label class="lbl">상단 스튜디오 메타 스탬프</label>
+            <input type="text" id="inTopStamp" class="inp" value="STUDIO MASTER // 24BIT 96KHZ" placeholder="비워두면 숨김" oninput="updateDecorations()">
+          </div>
+          <div>
+            <label class="lbl">우측 엣지 세로 인덱스 (LP 재킷 감성)</label>
+            <input type="text" id="inSideIndex" class="inp" value="PRODUCED & ARRANGED // STEREO" placeholder="비워두면 숨김" oninput="updateDecorations()">
+          </div>
         </div>
       </div>
 
@@ -435,17 +450,18 @@ Vocal Directing & Mixing, Mastering</textarea>
         </div>
 
         <div class="card-trim-box" id="trim-back">
-          <!-- 전체 배경 패턴 및 테두리 프레임 -->
+          <!-- 전체 배경 패턴, 테두리 프레임, 세로 시리얼 인덱스 -->
           <div class="decor-bg-pattern" id="outBgPattern"></div>
           <div class="decor-frame" id="outDecorFrame"></div>
+          <div class="decor-side-index" id="outSideIndex">PRODUCED & ARRANGED // STEREO</div>
 
-          <!-- 좌측 컬럼 (워터마크 격리 영역) -->
+          <!-- 좌측 컬럼 -->
           <div class="back-left-col">
-            <div class="decor-watermark-left" id="outWatermark"></div>
-
             <div style="position:relative; z-index:2;">
               <div class="decor-top-stamp" id="outTopStamp">STUDIO MASTER // 24BIT 96KHZ</div>
               <div class="back-name-group" id="outBackNameGroup"></div>
+              <!-- 이름 하단 포인트 악센트 룰 -->
+              <div class="decor-name-rule short" id="outNameRule"></div>
               <span class="micro-label" id="outMicroLabel">SPECIALTIES</span>
               <div id="outServicesContainer"></div>
               <div class="decor-music-widget" id="outMusicWidget"></div>
@@ -461,6 +477,7 @@ Vocal Directing & Mixing, Mastering</textarea>
 
           <!-- 우측 QR 및 소셜 컬럼 -->
           <div class="back-right-col">
+            <div class="qr-caption-tag" id="outQrCaption">SCAN TO LISTEN ↗</div>
             <div class="qr-box framed" id="outQrBox"></div>
             <div class="social-bar">
               <span class="social-handle" id="outSocialHandle">@aidenkim_music</span>
@@ -468,6 +485,7 @@ Vocal Directing & Mixing, Mastering</textarea>
             </div>
           </div>
         </div>
+        
       </div>
 
     </div>
