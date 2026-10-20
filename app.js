@@ -408,20 +408,11 @@ function renderCardContent() {
   const stageKr = document.getElementById('inStageKr')?.value.trim() || '';
   const real = document.getElementById('inReal')?.value.trim() || '';
   const nameStyle = document.getElementById('selNameStyle')?.value || 'two-line';
-  const frontRole = document.getElementById('inFrontRole')?.value || '';
   const microLabel = document.getElementById('inMicroLabel')?.value.trim() || '';
-  const serviceMode = document.getElementById('selServiceMode')?.value || 'text';
+  const serviceMode = document.getElementById('selServiceMode')?.value || 'dia-inline';
   const servicesRaw = document.getElementById('inServices')?.value || '';
   const cPrefixMode = document.getElementById('selContactPrefix')?.value || 'none';
   const socialHandle = document.getElementById('inSocialHandle')?.value || '';
-
-  document.getElementById('outFrontStage').textContent = stageEn;
-  const fReal = document.getElementById('outFrontReal');
-  const frontSubParts = [stageKr, real].filter(Boolean).join(' · ');
-  fReal.textContent = frontSubParts;
-  fReal.style.display = frontSubParts ? 'inline' : 'none';
-  document.getElementById('outFrontRole').textContent = frontRole;
-
   const nameGroup = document.getElementById('outBackNameGroup');
   let nameHtml = '';
 
