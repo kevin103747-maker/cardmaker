@@ -804,7 +804,7 @@ function prepareForCleanCapture(callback) {
   }, 150);
 }
 
-// html2canvas가 인라인 SVG(QR코드)에서 멈추지 않도록 onclone에서 <img>로 안전 변환
+// html2canvas의 createPattern(width/height 0) 버그를 원천 차단하는 안전 캡처 옵션
 function getCanvasOptions() {
   return {
     scale: 3,
@@ -812,6 +812,38 @@ function getCanvasOptions() {
     allowTaint: true,
     backgroundColor: null,
     onclone: (clonedDoc) => {
+      // 1) createPattern 에러의 주범인 노이즈 배경(::after) 및 다중 linear-gradient 배경을 캡처본에서 안전하게 처리
+      const styleFix = clonedDoc.createElement('style');
+      styleFix.textContent = `
+        .card-bleed-container::after { display: none !important; }
+        .decor-bg-pattern { background: none !important; }
+        .decor-frame.corner-bracket, .qr-box.framed { background: none !important; }
+      `;
+      clonedDoc.head.appendChild(styleFix);
+
+      // 2) 코너 브래킷(.corner-bracket)과 QR 뷰파인더(.qr-box.framed)를 에러 없는 순수 border 조각으로 복원
+      const acc = document.getElementById('cAcc')?.value || '#181818';
+      const drawCorners = (el, size, weight, color) => {
+        const pos = [
+          `top:0;left:0;border-top:${weight}px solid ${color};border-left:${weight}px solid ${color};`,
+          `top:0;right:0;border-top:${weight}px solid ${color};border-right:${weight}px solid ${color};`,
+          `bottom:0;left:0;border-bottom:${weight}px solid ${color};border-left:${weight}px solid ${color};`,
+          `bottom:0;right:0;border-bottom:${weight}px solid ${color};border-right:${weight}px solid ${color};`
+        ];
+        pos.forEach(p => {
+          const sp = clonedDoc.createElement('span');
+          sp.style.cssText = `position:absolute;width:${size}px;height:${size}px;pointer-events:none;${p}`;
+          el.appendChild(sp);
+        });
+      };
+
+      clonedDoc.querySelectorAll('#card-back-wrap .decor-frame.corner-bracket').forEach(el => drawCorners(el, 16, 1.2, acc));
+      clonedDoc.querySelectorAll('#card-back-wrap .qr-box.framed').forEach(el => drawCorners(el, 10, 1.5, acc));
+
+      const fAcc = getComputedStyle(document.documentElement).getPropertyValue('--f-accent').trim() || acc;
+      clonedDoc.querySelectorAll('#card-front-wrap .decor-frame.corner-bracket').forEach(el => drawCorners(el, 16, 1.2, fAcc));
+
+      // 3) QR코드 인라인 SVG에 명시적 픽셀 크기 부여
       const svgs = clonedDoc.querySelectorAll('#outQrBox svg');
       svgs.forEach(svgEl => {
         const xml = new XMLSerializer().serializeToString(svgEl);
@@ -825,6 +857,7 @@ function getCanvasOptions() {
     }
   };
 }
+
 
 function exportRasterPNG(targetId, label) {
   const target = document.getElementById(targetId);
