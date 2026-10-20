@@ -214,26 +214,32 @@ Vocal Directing & Mixing, Mastering</textarea>
         </div>
       </div>
 
-      <!-- 5. 연락처 항목 (드래그 앤 드롭) -->
+      <!-- 5. 연락처 항목 (클린 심볼 고정 + 프리픽스 디테일) -->
       <div class="panel-box">
         <div class="panel-title">
           <span>5. 연락처 항목 (드래그로 순서 변경)</span>
           <button class="btn-xs" onclick="addContactItem()"><i class="fa-solid fa-plus"></i> 추가</button>
         </div>
-        <div class="field-row">
-          <label class="lbl">연락처 아이콘 스타일</label>
-          <select id="selContactIconStyle" class="inp" onchange="renderCardContent()">
-            <option value="underlined">시안 오리지널 (전화/메일 하단 언더라인)</option>
-            <option value="clean">클린 심볼 단독</option>
-            <option value="boxed">원형 프레임 배지</option>
-          </select>
+        <div class="grid-2">
+          <div>
+            <label class="lbl">연락처 마이크로 라벨</label>
+            <select id="selContactPrefix" class="inp" onchange="renderCardContent()">
+              <option value="none" selected>심볼만 깔끔하게 표시</option>
+              <option value="code">심볼 + 영문코드 (T. / E. / W.)</option>
+              <option value="dot">심볼 + 구분점 (•)</option>
+            </select>
+          </div>
+          <div>
+            <label class="lbl"><span>심볼 아이콘 크기</span><span><span class="val-badge" id="vIconSz">13px</span> <i class="fa-solid fa-rotate-left sl-reset" onclick="resetSingleSlider('rIconSz', 13)"></i></span></label>
+            <input type="range" id="rIconSz" min="10" max="17" step="0.5" value="13" ondblclick="resetSingleSlider('rIconSz', 13)" oninput="updateDecorations()">
+          </div>
         </div>
         <div id="contactSortableList" class="sortable-list"></div>
       </div>
 
-      <!-- 6. QR코드 커스텀 (내부 심볼 제거로 인식률 & 미니멀리즘 극대화) & 소셜 아이콘 -->
+      <!-- 6. QR코드 커스텀 & 소셜 아이콘 (심볼 단독 고정) -->
       <div class="panel-box">
-        <div class="panel-title">6. QR코드 커스텀 & 소셜 아이콘</div>
+        <div class="panel-title">6. QR코드 커스텀 & 소셜 심볼</div>
         <div class="field-row">
           <label class="lbl">QR코드 연결 URL</label>
           <input type="text" id="inQrUrl" class="inp" value="https://soundcloud.com/aidenkim" oninput="renderCustomQR()">
@@ -275,45 +281,65 @@ Vocal Directing & Mixing, Mastering</textarea>
             <input type="text" id="inSocialHandle" class="inp" value="@aidenkim_music" oninput="renderCardContent()">
           </div>
           <div>
-            <label class="lbl">소셜 아이콘 형태</label>
-            <select id="selSocialStyle" class="inp" onchange="renderCardContent()">
-              <option value="solid">시안 오리지널 (솔리드 원형)</option>
-              <option value="outline">라인 원형 (Outline)</option>
-              <option value="minimal">심볼 단독 (Minimal)</option>
+            <label class="lbl">QR ↔ 소셜 사이 디테일</label>
+            <select id="selSocialCap" class="inp" onchange="updateDecorations()">
+              <option value="none">여백만 두기 (기본)</option>
+              <option value="line" selected>마이크로 숏 라인 (───)</option>
+              <option value="dia">미니 다이아몬드 점 (• ◆ •)</option>
             </select>
           </div>
         </div>
         <div class="field-row">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-            <label class="lbl" style="margin:0;">소셜 아이콘 목록 (드래그로 순서 변경)</label>
+            <label class="lbl" style="margin:0;">소셜 심볼 목록 (드래그로 순서 변경)</label>
             <button class="btn-xs" onclick="addSocialItem()"><i class="fa-solid fa-plus"></i> 추가</button>
           </div>
           <div id="socialSortableList" class="sortable-list"></div>
         </div>
       </div>
 
-      <!-- 7. 아이콘 위치 영점조절 & 하이엔드 디자인 디테일 -->
+      <!-- 7. 다이아몬드 세로선 디테일 & 하이엔드 꾸밈 요소 -->
       <div class="panel-box">
         <div class="panel-title">
-          <span>7. 아이콘 영점조절 & 에디토리얼 디테일</span>
+          <span>7. 다이아몬드 세로선 & 에디토리얼 디테일</span>
           <button class="btn-xs" onclick="resetIconOffsets()" title="아이콘 세로 위치 0px 정중앙 초기화"><i class="fa-solid fa-arrows-to-dot"></i> 아이콘 중앙맞춤</button>
         </div>
         <div class="grid-2">
           <div>
-            <label class="lbl"><span>좌측 연락처 아이콘 높이</span><span><span class="val-badge" id="vCIconY">0px</span> <i class="fa-solid fa-rotate-left sl-reset" onclick="resetIconOffsets('c')"></i></span></label>
+            <label class="lbl"><span>좌측 연락처 심볼 높이</span><span><span class="val-badge" id="vCIconY">0px</span> <i class="fa-solid fa-rotate-left sl-reset" onclick="resetIconOffsets('c')"></i></span></label>
             <input type="range" id="rCIconY" min="-5" max="5" step="0.5" value="0" ondblclick="resetIconOffsets('c')" oninput="updateDecorations()">
           </div>
           <div>
-            <label class="lbl"><span>우측 소셜 아이콘 높이</span><span><span class="val-badge" id="vSIconY">0px</span> <i class="fa-solid fa-rotate-left sl-reset" onclick="resetIconOffsets('s')"></i></span></label>
+            <label class="lbl"><span>우측 소셜 심볼 높이</span><span><span class="val-badge" id="vSIconY">0px</span> <i class="fa-solid fa-rotate-left sl-reset" onclick="resetIconOffsets('s')"></i></span></label>
             <input type="range" id="rSIconY" min="-5" max="5" step="0.5" value="0" ondblclick="resetIconOffsets('s')" oninput="updateDecorations()">
           </div>
         </div>
+
+        <!-- 중앙 세로선 다이아몬드 디테일 집중 설정 -->
+        <div class="grid-2">
+          <div>
+            <label class="lbl">중앙 세로선 다이아몬드 형태</label>
+            <select id="selDiaType" class="inp" onchange="updateDecorations()">
+              <option value="solid" selected>솔리드 다이아몬드 (◆)</option>
+              <option value="hollow">할로우 라인 다이아몬드 (◇)</option>
+              <option value="triple">트리플 주얼 포인트 (• ◆ •)</option>
+              <option value="double-gem">더블 다이아몬드 (◆  ◆)</option>
+              <option value="fade-dia">다이아몬드 + 양끝 페이드선</option>
+            </select>
+          </div>
+          <div>
+            <label class="lbl"><span>다이아몬드 심볼 크기</span><span><span class="val-badge" id="vDiaSz">8px</span> <i class="fa-solid fa-rotate-left sl-reset" onclick="resetSingleSlider('rDiaSz', 8)"></i></span></label>
+            <input type="range" id="rDiaSz" min="5" max="14" step="0.5" value="8" ondblclick="resetSingleSlider('rDiaSz', 8)" oninput="updateDecorations()">
+          </div>
+        </div>
+
         <div class="grid-2">
           <div>
             <label class="lbl">이름 하단 포인트 라인 (Name Rule)</label>
             <select id="selNameRule" class="inp" onchange="updateDecorations()">
               <option value="none">없음 (기본 여백)</option>
-              <option value="short" selected>모던 숏 액센트 바 (32px)</option>
+              <option value="short">모던 숏 액센트 바 (32px)</option>
+              <option value="dia-rule" selected>다이아몬드 포인트 라인 (── ◆)</option>
               <option value="dot-line">타이포그래피 도트 라인 (── •)</option>
               <option value="full">전체 얇은 구분선</option>
             </select>
@@ -324,6 +350,7 @@ Vocal Directing & Mixing, Mastering</textarea>
               <option value="player" selected>미니 뮤직 플레이어 바</option>
               <option value="wave">오디오 사운드웨이브 파형</option>
               <option value="piano">미니멀 피아노 건반 심볼</option>
+              <option value="timecode">트랙 타임코드 (00:00 ── 03:45)</option>
               <option value="none">없음</option>
             </select>
           </div>
@@ -336,25 +363,6 @@ Vocal Directing & Mixing, Mastering</textarea>
             </select>
           </div>
           <div>
-            <label class="lbl">배경 텍스처 & 스튜디오 조명</label>
-            <select id="selBgPattern" class="inp" onchange="updateDecorations()">
-              <option value="none">없음 (플랫 무지)</option>
-              <option value="glow" selected>소프트 앰비언트 라이트 (은은한 입체감)</option>
-              <option value="dots">엔지니어링 도트 매트릭스</option>
-              <option value="grid">스튜디오 모눈 그리드</option>
-              <option value="staff">하단 미니멀 오선지 라인</option>
-            </select>
-          </div>
-          <div>
-            <label class="lbl">중앙 세로선 디자인</label>
-            <select id="selDivStyle" class="inp" onchange="updateDecorations()">
-              <option value="solid">시안 기본 직선</option>
-              <option value="diamond" selected>중앙 다이아몬드(◆) 포인트</option>
-              <option value="fade">양끝 그라데이션 페이드</option>
-              <option value="double">클래식 이중선 (Double Line)</option>
-            </select>
-          </div>
-          <div>
             <label class="lbl">외곽 에디토리얼 프레임</label>
             <select id="selFrameStyle" class="inp" onchange="updateDecorations()">
               <option value="none">없음</option>
@@ -363,15 +371,9 @@ Vocal Directing & Mixing, Mastering</textarea>
             </select>
           </div>
         </div>
-        <div class="grid-2" style="margin-bottom:0; margin-top:6px;">
-          <div>
-            <label class="lbl">상단 스튜디오 메타 스탬프</label>
-            <input type="text" id="inTopStamp" class="inp" value="STUDIO MASTER // 24BIT 96KHZ" placeholder="비워두면 숨김" oninput="updateDecorations()">
-          </div>
-          <div>
-            <label class="lbl">우측 엣지 세로 인덱스 (LP 재킷 감성)</label>
-            <input type="text" id="inSideIndex" class="inp" value="PRODUCED & ARRANGED // STEREO" placeholder="비워두면 숨김" oninput="updateDecorations()">
-          </div>
+        <div class="field-row" style="margin-top:6px;">
+          <label class="lbl">상단 스튜디오 메타 스탬프 (비워두면 숨김)</label>
+          <input type="text" id="inTopStamp" class="inp" value="STUDIO MASTER // 24BIT 96KHZ" placeholder="비워두면 숨김" oninput="updateDecorations()">
         </div>
       </div>
 
@@ -450,18 +452,15 @@ Vocal Directing & Mixing, Mastering</textarea>
         </div>
 
         <div class="card-trim-box" id="trim-back">
-          <!-- 전체 배경 패턴, 테두리 프레임, 세로 시리얼 인덱스 -->
-          <div class="decor-bg-pattern" id="outBgPattern"></div>
+          <!-- 외곽 테두리 프레임 -->
           <div class="decor-frame" id="outDecorFrame"></div>
-          <div class="decor-side-index" id="outSideIndex">PRODUCED & ARRANGED // STEREO</div>
 
           <!-- 좌측 컬럼 -->
           <div class="back-left-col">
             <div style="position:relative; z-index:2;">
               <div class="decor-top-stamp" id="outTopStamp">STUDIO MASTER // 24BIT 96KHZ</div>
               <div class="back-name-group" id="outBackNameGroup"></div>
-              <!-- 이름 하단 포인트 악센트 룰 -->
-              <div class="decor-name-rule short" id="outNameRule"></div>
+              <div class="decor-name-rule dia-rule" id="outNameRule"></div>
               <span class="micro-label" id="outMicroLabel">SPECIALTIES</span>
               <div id="outServicesContainer"></div>
               <div class="decor-music-widget" id="outMusicWidget"></div>
@@ -470,15 +469,18 @@ Vocal Directing & Mixing, Mastering</textarea>
             <div class="back-contact-list" id="outContactList" style="position:relative; z-index:2;"></div>
           </div>
 
-          <!-- 중앙 세로 구분선 -->
+          <!-- 중앙 다이아몬드 세로 구분선 -->
           <div class="back-divider-wrap">
-            <div class="back-divider-line" id="outDividerLine"></div>
+            <div class="back-divider-line" id="outDividerLine">
+              <span class="divider-gem" id="outDividerGem">◆</span>
+            </div>
           </div>
 
           <!-- 우측 QR 및 소셜 컬럼 -->
           <div class="back-right-col">
             <div class="qr-caption-tag" id="outQrCaption">SCAN TO LISTEN ↗</div>
             <div class="qr-box framed" id="outQrBox"></div>
+            <div class="social-cap line" id="outSocialCap"></div>
             <div class="social-bar">
               <span class="social-handle" id="outSocialHandle">@aidenkim_music</span>
               <div class="social-icons" id="outSocialIcons"></div>

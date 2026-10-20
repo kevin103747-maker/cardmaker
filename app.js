@@ -396,7 +396,31 @@ function renderCustomQR() {
   saveStateToLocal();
 }
 
-// 6. 명함 콘텐츠 렌더링 (3중 이름 지원)
+// 슬라이더 단일 리셋 보강 (레이아웃 + 장식 슬라이더 모두 호환)
+function resetSingleSlider(id, defaultVal) {
+  const el = document.getElementById(id);
+  if (el) {
+    el.value = defaultVal;
+    updateLayoutVars();
+    updateDecorations();
+  }
+}
+
+// 연락처 아이콘별 영문 마이크로 코드 매핑
+function getContactPrefixCode(iconClass) {
+  if (iconClass.includes('phone')) return 'T.';
+  if (iconClass.includes('envelope')) return 'E.';
+  if (iconClass.includes('globe')) return 'W.';
+  if (iconClass.includes('instagram')) return 'IG.';
+  if (iconClass.includes('soundcloud')) return 'SC.';
+  if (iconClass.includes('youtube')) return 'YT.';
+  if (iconClass.includes('spotify')) return 'SP.';
+  if (iconClass.includes('comment')) return 'M.';
+  if (iconClass.includes('location')) return 'L.';
+  return '•';
+}
+
+// 6. 명함 콘텐츠 렌더링 (클린 심볼 단독 고정 & 연락처 프리픽스 지원)
 function renderCardContent() {
   const stageEn = document.getElementById('inStage')?.value.trim() || '';
   const stageKr = document.getElementById('inStageKr')?.value.trim() || '';
@@ -406,9 +430,8 @@ function renderCardContent() {
   const microLabel = document.getElementById('inMicroLabel')?.value.trim() || '';
   const serviceMode = document.getElementById('selServiceMode')?.value || 'text';
   const servicesRaw = document.getElementById('inServices')?.value || '';
-  const cIconStyle = document.getElementById('selContactIconStyle')?.value || 'underlined';
+  const cPrefixMode = document.getElementById('selContactPrefix')?.value || 'none';
   const socialHandle = document.getElementById('inSocialHandle')?.value || '';
-  const socialStyle = document.getElementById('selSocialStyle')?.value || 'solid';
 
   document.getElementById('outFrontStage').textContent = stageEn;
   const fReal = document.getElementById('outFrontReal');
@@ -468,21 +491,23 @@ function renderCardContent() {
     sContainer.appendChild(wrap);
   }
 
+  // 좌측 연락처 (심볼 단독 고정 + 선택적 마이크로 코드)
   const cList = document.getElementById('outContactList');
   cList.innerHTML = '';
   contacts.forEach(c => {
     const row = document.createElement('div');
     row.className = 'contact-row';
-    let icCls = 'c-icon-box';
-    if (cIconStyle === 'underlined' && (c.icon.includes('phone') || c.icon.includes('envelope'))) {
-      icCls += ' underlined';
-    } else if (cIconStyle === 'boxed') {
-      icCls += ' boxed';
+    let prefixHtml = '';
+    if (cPrefixMode === 'code') {
+      prefixHtml = `<span class="c-prefix">${getContactPrefixCode(c.icon)}</span>`;
+    } else if (cPrefixMode === 'dot') {
+      prefixHtml = `<span class="c-prefix">•</span>`;
     }
-    row.innerHTML = `<span class="${icCls}"><i class="${c.icon}"></i></span><span class="c-text">${c.text}</span>`;
+    row.innerHTML = `<span class="c-icon-box"><i class="${c.icon}"></i></span>${prefixHtml}<span class="c-text">${c.text}</span>`;
     cList.appendChild(row);
   });
 
+  // 우측 소셜 바 (심볼 단독 고정)
   const hEl = document.getElementById('outSocialHandle');
   hEl.textContent = socialHandle;
   hEl.style.display = socialHandle.trim() ? 'inline-flex' : 'none';
@@ -491,7 +516,7 @@ function renderCardContent() {
   sBox.innerHTML = '';
   socials.forEach(ic => {
     const b = document.createElement('span');
-    b.className = 's-badge' + (socialStyle !== 'solid' ? ' ' + socialStyle : '');
+    b.className = 's-badge';
     b.innerHTML = `<i class="${ic}"></i>`;
     sBox.appendChild(b);
   });
@@ -499,67 +524,84 @@ function renderCardContent() {
   saveStateToLocal();
 }
 
-// 7. 아이콘 세로 영점 조절 & 하이엔드 디자인 디테일 반영
+// 7. 다이아몬드 세로선 디테일 & 꾸밈 요소 반영
 function updateDecorations() {
   const cOff = document.getElementById('rCIconY')?.value || 0;
   const sOff = document.getElementById('rSIconY')?.value || 0;
+  const iconSz = document.getElementById('rIconSz')?.value || 13;
+  const diaSz = document.getElementById('rDiaSz')?.value || 8;
+
   if (document.getElementById('vCIconY')) document.getElementById('vCIconY').textContent = cOff + 'px';
   if (document.getElementById('vSIconY')) document.getElementById('vSIconY').textContent = sOff + 'px';
-  document.documentElement.style.setProperty('--c-icon-offset-y', cOff + 'px');
-  document.documentElement.style.setProperty('--s-icon-offset-y', sOff + 'px');
+  if (document.getElementById('vIconSz')) document.getElementById('vIconSz').textContent = iconSz + 'px';
+  if (document.getElementById('vDiaSz')) document.getElementById('vDiaSz').textContent = diaSz + 'px';
 
-  const nameRule = document.getElementById('selNameRule')?.value || 'short';
+  const root = document.documentElement;
+  root.style.setProperty('--c-icon-offset-y', cOff + 'px');
+  root.style.setProperty('--s-icon-offset-y', sOff + 'px');
+  root.style.setProperty('--symbol-size', iconSz + 'px');
+  root.style.setProperty('--dia-size', diaSz + 'px');
+
+  const diaType = document.getElementById('selDiaType')?.value || 'solid';
+  const nameRule = document.getElementById('selNameRule')?.value || 'dia-rule';
   const qrCaption = document.getElementById('selQrCaption')?.value || 'SCAN TO LISTEN ↗';
-  const divStyle = document.getElementById('selDivStyle')?.value || 'solid';
-  const frameStyle = document.getElementById('selFrameStyle')?.value || 'none';
-  const bgPat = document.getElementById('selBgPattern')?.value || 'glow';
+  const socialCap = document.getElementById('selSocialCap')?.value || 'line';
+  const frameStyle = document.getElementById('selFrameStyle')?.value || 'corner-bracket';
   const qrFrame = document.getElementById('selQrFrame')?.value || 'framed';
   const widget = document.getElementById('selMusicWidget')?.value || 'player';
   const stampText = document.getElementById('inTopStamp')?.value.trim() || '';
-  const sideIdxText = document.getElementById('inSideIndex')?.value.trim() || '';
 
-  // 이름 하단 포인트 룰
+  // 1) 중앙 다이아몬드 세로선 5가지 디테일
+  const divLine = document.getElementById('outDividerLine');
+  const gemEl = document.getElementById('outDividerGem');
+  if (divLine && gemEl) {
+    divLine.className = 'back-divider-line' + (diaType === 'fade-dia' ? ' fade-dia' : '');
+    gemEl.className = 'divider-gem' + (diaType === 'double-gem' ? ' double-gem' : '');
+
+    if (diaType === 'solid' || diaType === 'fade-dia') {
+      gemEl.innerHTML = '◆';
+    } else if (diaType === 'hollow') {
+      gemEl.innerHTML = '◇';
+    } else if (diaType === 'triple') {
+      gemEl.innerHTML = '<span style="font-size:0.55em; opacity:0.6;">•</span><span>◆</span><span style="font-size:0.55em; opacity:0.6;">•</span>';
+    } else if (diaType === 'double-gem') {
+      gemEl.innerHTML = '<span>◆</span><span>◆</span>';
+    }
+  }
+
+  // 2) 이름 하단 포인트 룰
   const ruleEl = document.getElementById('outNameRule');
   if (ruleEl) ruleEl.className = 'decor-name-rule' + (nameRule !== 'none' ? ' ' + nameRule : '');
 
-  // QR 상단 캡션 태그
+  // 3) QR 상단 캡션 태그
   const capEl = document.getElementById('outQrCaption');
   if (capEl) {
     capEl.textContent = qrCaption === 'none' ? '' : qrCaption;
     capEl.style.display = qrCaption === 'none' ? 'none' : 'block';
   }
 
-  // 세로선 스타일
-  const divEl = document.getElementById('outDividerLine');
-  if (divEl) divEl.className = 'back-divider-line' + (divStyle !== 'solid' ? ' ' + divStyle : '');
+  // 4) QR ↔ 소셜 구분 캡
+  const sCapEl = document.getElementById('outSocialCap');
+  if (sCapEl) {
+    sCapEl.className = 'social-cap ' + socialCap;
+    sCapEl.textContent = socialCap === 'dia' ? '• ◆ •' : '';
+  }
 
-  // 외곽 프레임
+  // 5) 외곽 프레임 & QR 프레임
   const frameEl = document.getElementById('outDecorFrame');
   if (frameEl) frameEl.className = 'decor-frame' + (frameStyle !== 'none' ? ' ' + frameStyle : '');
 
-  // 배경 패턴 & 스튜디오 조명
-  const patEl = document.getElementById('outBgPattern');
-  if (patEl) patEl.className = 'decor-bg-pattern' + (bgPat !== 'none' ? ' ' + bgPat : '');
-
-  // QR 프레임
   const qrEl = document.getElementById('outQrBox');
   if (qrEl) qrEl.className = 'qr-box' + (qrFrame !== 'none' ? ' ' + qrFrame : '');
 
-  // 상단 스튜디오 스탬프
+  // 6) 상단 스튜디오 스탬프
   const stEl = document.getElementById('outTopStamp');
   if (stEl) {
     stEl.textContent = stampText;
     stEl.className = 'decor-top-stamp' + (stampText ? ' active' : '');
   }
 
-  // 우측 엣지 세로 인덱스
-  const sideEl = document.getElementById('outSideIndex');
-  if (sideEl) {
-    sideEl.textContent = sideIdxText;
-    sideEl.style.display = sideIdxText ? 'block' : 'none';
-  }
-
-  // 뮤직 그래픽 위젯
+  // 7) 뮤직 그래픽 위젯 (다이아몬드 노브 플레이어 / 파형 / 피아노 / 타임코드)
   const wEl = document.getElementById('outMusicWidget');
   if (wEl) {
     if (widget === 'player') {
@@ -579,6 +621,12 @@ function updateDecorations() {
         <span class="black"></span><span class="black"></span><span></span>
         <span class="black"></span><span class="black"></span><span class="black"></span><span></span>
         <span class="black"></span><span class="black"></span><span style="border-right:none"></span>
+      </div>`;
+    } else if (widget === 'timecode') {
+      wEl.innerHTML = `<div class="mini-player-bar" style="letter-spacing:1px;">
+        <span>REC ● 00:01:28:14</span>
+        <span style="opacity:0.4;">//</span>
+        <span>MASTER</span>
       </div>`;
     } else {
       wEl.innerHTML = '';
@@ -616,23 +664,23 @@ function collectCurrentState() {
     inMicroLabel: g('inMicroLabel'),
     selServiceMode: g('selServiceMode'),
     inServices: g('inServices'),
-    selContactIconStyle: g('selContactIconStyle'),
+    selContactPrefix: g('selContactPrefix'),
+    rIconSz: g('rIconSz'),
     inQrUrl: g('inQrUrl'),
     selQrModule: g('selQrModule'),
     selQrEye: g('selQrEye'),
     selQrCaption: g('selQrCaption'),
     inSocialHandle: g('inSocialHandle'),
-    selSocialStyle: g('selSocialStyle'),
+    selSocialCap: g('selSocialCap'),
     rCIconY: g('rCIconY'),
     rSIconY: g('rSIconY'),
+    selDiaType: g('selDiaType'),
+    rDiaSz: g('rDiaSz'),
     selNameRule: g('selNameRule'),
     selMusicWidget: g('selMusicWidget'),
     selQrFrame: g('selQrFrame'),
-    selBgPattern: g('selBgPattern'),
-    selDivStyle: g('selDivStyle'),
     selFrameStyle: g('selFrameStyle'),
     inTopStamp: g('inTopStamp'),
-    inSideIndex: g('inSideIndex'),
     contacts: contacts,
     socials: socials
   };

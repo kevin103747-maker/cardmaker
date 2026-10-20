@@ -614,7 +614,12 @@ input[type="range"] {
   letter-spacing: var(--service-tracking);
 }
 
-/* ================= 연락처 아이콘 & 텍스트 수직 정렬 ================= */
+/* ================= 연락처 심볼 단독 고정 & 수직 정렬 ================= */
+:root {
+  --symbol-size: 13px;
+  --dia-size: 8px;
+}
+
 .back-contact-list {
   display: flex;
   flex-direction: column;
@@ -625,46 +630,35 @@ input[type="range"] {
 .contact-row {
   display: flex;
   align-items: center;
-  gap: 13px;
+  gap: 11px;
   height: 20px;
 }
 
 .c-icon-box {
-  width: 20px;
+  width: 18px;
   height: 20px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   color: var(--accent);
   flex-shrink: 0;
-  position: relative;
   transform: translateY(var(--c-icon-offset-y));
 }
 
 .c-icon-box i {
-  font-size: 12.5px;
+  font-size: var(--symbol-size);
   line-height: 1;
   display: block;
 }
 
-/* 시안의 언더라인을 아이콘 중심선을 건드리지 않고 바닥에 분리 배치 */
-.c-icon-box.underlined::after {
-  content: "";
-  position: absolute;
-  bottom: 0px;
-  left: 3.5px;
-  right: 3.5px;
-  height: 1.2px;
-  background-color: var(--accent);
-  opacity: 0.78;
-}
-
-.c-icon-box.boxed {
-  border-radius: 50%;
-  border: 1px solid var(--accent);
-}
-.c-icon-box.boxed i {
+.c-prefix {
   font-size: 10px;
+  font-weight: 700;
+  color: var(--accent);
+  opacity: 0.55;
+  letter-spacing: 0.5px;
+  margin-right: -4px;
+  font-family: monospace;
 }
 
 .c-text {
@@ -678,7 +672,7 @@ input[type="range"] {
   align-items: center;
 }
 
-/* ================= 중앙 세로 구분선 & 스타일 ================= */
+/* ================= 중앙 세로선 (다이아몬드 디테일 5종) ================= */
 .back-divider-wrap {
   display: flex;
   align-items: center;
@@ -687,35 +681,49 @@ input[type="range"] {
   position: relative;
   z-index: 2;
 }
+
 .back-divider-line {
   width: var(--divider-width);
   height: var(--divider-height);
   background-color: var(--accent);
   border-radius: 2px;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-}
-.back-divider-line.fade {
-  background: linear-gradient(to bottom, transparent, var(--accent) 15%, var(--accent) 85%, transparent);
-}
-.back-divider-line.diamond::after {
-  content: "◆";
-  font-size: 8px;
-  color: var(--accent);
-  background-color: var(--card-bg);
-  padding: 6px 0;
-  line-height: 1;
-}
-.back-divider-line.double {
-  width: 4px;
-  background: transparent;
-  border-left: 1px solid var(--accent);
-  border-right: 1px solid var(--accent);
-  border-radius: 0;
+  position: relative;
 }
 
-/* ================= 우측 QR & 소셜 바 수직 정렬 ================= */
+.back-divider-line.fade-dia {
+  background: linear-gradient(to bottom, transparent, var(--accent) 16%, var(--accent) 84%, transparent);
+}
+
+.divider-gem {
+  font-size: var(--dia-size);
+  color: var(--accent);
+  background-color: var(--card-bg);
+  padding: 6px 2px;
+  line-height: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  user-select: none;
+}
+
+.divider-gem.double-gem {
+  height: 46%;
+  justify-content: space-between;
+  background-color: transparent;
+  padding: 0;
+}
+.divider-gem.double-gem span {
+  background-color: var(--card-bg);
+  padding: 5px 2px;
+  line-height: 1;
+}
+
+/* ================= 우측 QR & 소셜 심볼 단독 정렬 ================= */
 .back-right-col {
   flex: 1;
   padding-left: var(--divider-gap);
@@ -727,10 +735,20 @@ input[type="range"] {
   z-index: 2;
 }
 
+.qr-caption-tag {
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: 1.8px;
+  color: var(--accent);
+  opacity: 0.65;
+  margin-bottom: 7px;
+  text-transform: uppercase;
+}
+
 .qr-box {
   width: var(--qr-size);
   height: var(--qr-size);
-  margin-bottom: 16px;
+  margin-bottom: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -751,18 +769,41 @@ input[type="range"] {
   background-repeat: no-repeat;
   background-size: 10px 10px;
 }
+.qr-box.soft-box {
+  padding: 9px;
+  border: 1px solid rgba(128, 128, 128, 0.28);
+  border-radius: 8px;
+}
 .qr-box svg {
   width: 100%;
   height: 100%;
   display: block;
 }
 
+/* QR 하단 소셜 구분 캡 */
+.social-cap {
+  margin-bottom: 8px;
+  color: var(--accent);
+  opacity: 0.45;
+  font-size: 7px;
+  letter-spacing: 3px;
+  line-height: 1;
+}
+.social-cap.line {
+  width: 28px;
+  height: 1px;
+  background-color: var(--accent);
+}
+.social-cap.none {
+  display: none;
+}
+
 .social-bar {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 7px;
-  min-height: 22px;
+  gap: 8px;
+  height: 20px;
 }
 
 .social-handle {
@@ -779,16 +820,14 @@ input[type="range"] {
 .social-icons {
   display: inline-flex;
   align-items: center;
-  gap: 5.5px;
+  gap: 8px;
   height: 20px;
 }
 
+/* 우측 소셜 아이콘: 원형 껍데기 없이 심볼 단독 고정 */
 .s-badge {
-  width: 20px;
   height: 20px;
-  border-radius: 50%;
-  background-color: var(--accent);
-  color: var(--card-bg);
+  color: var(--accent);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -796,51 +835,22 @@ input[type="range"] {
 }
 
 .s-badge i {
-  font-size: 10.5px;
+  font-size: var(--symbol-size);
   line-height: 1;
   display: block;
 }
 
-.s-badge.outline {
-  background-color: transparent;
-  color: var(--accent);
-  border: 1.2px solid var(--accent);
+/* ================= 에디토리얼 디테일 & 위젯 스타일 ================= */
+.sl-reset {
+  cursor: pointer;
+  color: #64748b;
+  font-size: 10px;
+  margin-left: 4px;
+  transition: color 0.15s, transform 0.2s;
 }
-
-.s-badge.minimal {
-  background-color: transparent;
-  color: var(--accent);
-  width: auto;
-  padding: 0 2px;
-}
-.s-badge.minimal i {
-  font-size: 13.5px;
-}
-
-/* ================= 그래픽 꾸밈 요소 스타일 ================= */
-.decor-bg-pattern {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-  opacity: 0.055;
-}
-.decor-bg-pattern.dots {
-  background-image: radial-gradient(var(--accent) 1px, transparent 1px);
-  background-size: 14px 14px;
-}
-.decor-bg-pattern.grid {
-  background-image:
-    linear-gradient(to right, var(--accent) 0.6px, transparent 0.6px),
-    linear-gradient(to bottom, var(--accent) 0.6px, transparent 0.6px);
-  background-size: 24px 24px;
-}
-.decor-bg-pattern.staff {
-  background-image: repeating-linear-gradient(to bottom, var(--accent) 0px, var(--accent) 0.7px, transparent 0.7px, transparent 6px);
-  height: 26px;
-  top: auto;
-  bottom: 35px;
-  opacity: 0.08;
+.sl-reset:hover {
+  color: #e2e8f0;
+  transform: rotate(-45deg);
 }
 
 .decor-frame {
@@ -868,17 +878,52 @@ input[type="range"] {
   opacity: 0.45;
 }
 
-.decor-watermark-left {
-  position: absolute;
-  right: 10px;
-  bottom: -20px;
-  font-size: 155px;
-  color: var(--accent);
-  opacity: 0.035;
-  pointer-events: none;
-  z-index: 0;
+.decor-name-rule {
+  margin-top: 2px;
+  margin-bottom: 10px;
+  display: none;
+}
+.decor-name-rule.short {
+  display: block;
+  width: 32px;
+  height: 1.8px;
+  background-color: var(--accent);
+  opacity: 0.85;
+}
+.decor-name-rule.full {
+  display: block;
+  width: 100%;
+  height: 0.8px;
+  background: linear-gradient(to right, var(--accent) 40%, transparent 100%);
+  opacity: 0.35;
+}
+.decor-name-rule.dot-line,
+.decor-name-rule.dia-rule {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.decor-name-rule.dot-line::before,
+.decor-name-rule.dia-rule::before {
+  content: "";
+  width: 28px;
+  height: 1.2px;
+  background-color: var(--accent);
+  opacity: 0.75;
+}
+.decor-name-rule.dot-line::after {
+  content: "•";
+  font-size: 9px;
   line-height: 1;
-  transform: rotate(-12deg);
+  color: var(--accent);
+  opacity: 0.75;
+}
+.decor-name-rule.dia-rule::after {
+  content: "◆";
+  font-size: 6.5px;
+  line-height: 1;
+  color: var(--accent);
+  opacity: 0.8;
 }
 
 .decor-top-stamp {
@@ -895,9 +940,9 @@ input[type="range"] {
 }
 .decor-top-stamp.active { display: flex; }
 .decor-top-stamp::before {
-  content: "●";
+  content: "◆";
   color: var(--accent);
-  font-size: 7px;
+  font-size: 6.5px;
 }
 
 .decor-music-widget {
@@ -943,7 +988,7 @@ input[type="range"] {
 .player-knob {
   width: 5px;
   height: 5px;
-  border-radius: 50%;
+  transform: rotate(45deg);
   background: var(--accent);
 }
 .piano-keys {
@@ -965,99 +1010,4 @@ input[type="range"] {
   height: 7px;
   background: var(--accent);
   z-index: 1;
-}
-/* ================= 슬라이더 개별 초기화 아이콘 & 신규 디자인 디테일 ================= */
-.sl-reset {
-  cursor: pointer;
-  color: #64748b;
-  font-size: 10px;
-  margin-left: 4px;
-  transition: color 0.15s, transform 0.2s;
-}
-.sl-reset:hover {
-  color: #e2e8f0;
-  transform: rotate(-45deg);
-}
-
-/* 1) 이름 하단 포인트 악센트 룰 (Name Accent Rule) */
-.decor-name-rule {
-  margin-top: 2px;
-  margin-bottom: 10px;
-  display: none;
-}
-.decor-name-rule.short {
-  display: block;
-  width: 32px;
-  height: 1.8px;
-  background-color: var(--accent);
-  opacity: 0.85;
-}
-.decor-name-rule.full {
-  display: block;
-  width: 100%;
-  height: 0.8px;
-  background: linear-gradient(to right, var(--accent) 40%, transparent 100%);
-  opacity: 0.35;
-}
-.decor-name-rule.dot-line {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-.decor-name-rule.dot-line::before {
-  content: "";
-  width: 28px;
-  height: 1.2px;
-  background-color: var(--accent);
-  opacity: 0.7;
-}
-.decor-name-rule.dot-line::after {
-  content: "•";
-  font-size: 9px;
-  line-height: 1;
-  color: var(--accent);
-  opacity: 0.7;
-}
-
-/* 2) QR 상단 캡션 태그 (SCAN TO LISTEN ↗) */
-.qr-caption-tag {
-  font-size: 8.5px;
-  font-weight: 700;
-  letter-spacing: 1.8px;
-  color: var(--accent);
-  opacity: 0.65;
-  margin-bottom: 7px;
-  text-transform: uppercase;
-}
-
-.qr-box.soft-box {
-  padding: 9px;
-  border: 1px solid rgba(128, 128, 128, 0.28);
-  border-radius: 8px;
-}
-
-/* 3) 배경 소프트 앰비언트 스튜디오 라이트 */
-.decor-bg-pattern.glow {
-  opacity: 0.08;
-  background:
-    radial-gradient(circle at 12% 18%, var(--accent) 0%, transparent 48%),
-    radial-gradient(circle at 88% 85%, var(--accent) 0%, transparent 45%);
-}
-
-/* 4) 우측 가장자리 세로 시리얼 인덱스 (LP 재킷/에디토리얼 감성) */
-.decor-side-index {
-  position: absolute;
-  right: 9px;
-  top: 50%;
-  transform: translateY(-50%) rotate(90deg);
-  transform-origin: center;
-  font-size: 7.5px;
-  font-family: monospace;
-  font-weight: 600;
-  letter-spacing: 2.2px;
-  color: var(--text-sub);
-  opacity: 0.42;
-  white-space: nowrap;
-  pointer-events: none;
-  z-index: 2;
 }
