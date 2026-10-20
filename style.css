@@ -481,42 +481,174 @@ input[type="range"] {
 .crop-bl { bottom: calc(var(--bleed-px) - 14px); left: calc(var(--bleed-px) - 14px); border-right-width: 1px; border-top-width: 1px; }
 .crop-br { bottom: calc(var(--bleed-px) - 14px); right: calc(var(--bleed-px) - 14px); border-left-width: 1px; border-top-width: 1px; }
 
-/* ================= 앞면 (Front) ================= */
+/* ================= 앞면 (Front: 로고 + 심플 부가정보) ================= */
+:root {
+  --f-logo-size: 64px;
+}
+
 #trim-front {
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
+  position: relative;
 }
-.front-name-wrap {
+
+/* 구도 1: 정중앙 로고 + 맨 아래 부가정보 */
+#trim-front.f-layout-center-logo {
+  justify-content: space-between;
+  align-items: center;
+  text-align: center;
+}
+#trim-front.f-layout-center-logo .front-logo-area {
+  margin-top: auto;
+  margin-bottom: auto;
+}
+
+/* 구도 2: 시안 오리지널 스타일 (좌측 상단 로고 + 좌측 하단 부가정보 & 라인) */
+#trim-front.f-layout-original-line {
+  justify-content: space-between;
+  align-items: flex-start;
+  text-align: left;
+}
+#trim-front.f-layout-original-line .front-info-area {
+  width: 100%;
+  align-items: flex-start;
+}
+
+/* 구도 3: 정중앙에 로고와 텍스트가 함께 모인 구도 */
+#trim-front.f-layout-pure-center {
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  gap: 20px;
+}
+
+.front-logo-area {
   display: flex;
-  align-items: baseline;
-  gap: 10px;
-  margin-bottom: 6px;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
 }
-.front-stage {
-  font-size: calc(var(--name-size) + 6px);
+
+.front-uploaded-logo {
+  height: var(--f-logo-size);
+  width: auto;
+  max-width: 320px;
+  object-fit: contain;
+  display: block;
+}
+.front-uploaded-logo.invert {
+  filter: brightness(0) invert(1);
+}
+.front-uploaded-logo.grayscale {
+  filter: grayscale(100%) contrast(120%);
+}
+
+/* 로고 파일이 없을 때 쓰는 세련된 타이포 모노그램 배지 */
+.front-monogram-badge {
+  width: var(--f-logo-size);
+  height: var(--f-logo-size);
+  border: 1.5px solid var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transform: rotate(45deg);
+}
+.front-monogram-badge span {
+  transform: rotate(-45deg);
+  font-size: calc(var(--f-logo-size) * 0.42);
+  font-weight: 800;
+  color: var(--text-main);
+  letter-spacing: -0.5px;
+}
+
+.front-symbol-mark {
+  font-size: var(--f-logo-size);
+  color: var(--accent);
+  line-height: 1;
+}
+
+.front-info-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 2;
+  width: 100%;
+}
+
+.front-main-title {
+  font-size: 16px;
   font-weight: 700;
   color: var(--text-main);
-  letter-spacing: var(--name-tracking);
-  line-height: 1.1;
+  letter-spacing: 2.5px;
+  line-height: 1.2;
+  margin-bottom: 5px;
 }
-.front-real {
-  font-size: 14px;
+#trim-front.f-layout-original-line .front-main-title {
+  font-size: 26px;
+  letter-spacing: -0.4px;
+}
+
+.front-sub-info {
+  font-size: 10.5px;
   font-weight: 400;
   color: var(--text-sub);
+  letter-spacing: 2px;
+  margin-bottom: 12px;
 }
-.front-role {
-  font-size: 15px;
-  font-weight: 400;
-  color: var(--text-sub);
-  letter-spacing: 0.2px;
-  margin-bottom: 14px;
+#trim-front.f-layout-original-line .front-sub-info {
+  font-size: 13.5px;
+  letter-spacing: 0.4px;
 }
-.front-line {
+
+/* 앞면 포인트 라인 스타일 */
+.front-line-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  color: var(--accent);
+}
+.front-line-box.none { display: none; }
+.front-line-box.short {
+  width: 36px;
+  height: 1.5px;
+  background-color: var(--accent);
+}
+.front-line-box.full {
   width: 100%;
   height: var(--divider-width);
   background-color: var(--accent);
 }
+.front-line-box.dia-center {
+  gap: 8px;
+  max-width: 180px;
+}
+.front-line-box.dia-center::before,
+.front-line-box.dia-center::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background-color: var(--accent);
+  opacity: 0.65;
+}
+.front-line-box.dia-end {
+  gap: 6px;
+  width: 100%;
+}
+.front-line-box.dia-end::before {
+  content: "";
+  flex: 1;
+  height: 1.2px;
+  background-color: var(--accent);
+  opacity: 0.8;
+}
+.front-line-gem {
+  font-size: 7px;
+  line-height: 1;
+  color: var(--accent);
+}
+
 
 /* ================= 뒷면 (Back - 메인 양식) ================= */
 #trim-back {

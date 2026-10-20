@@ -53,30 +53,36 @@ function updatePrintSettings() {
   saveStateToLocal();
 }
 
-// 2. 뷰 전환
+// 2. 뷰 전환 (앞면 단독 정면 뷰 포함)
 function switchView(mode) {
   const wrap = document.getElementById('stageWrap');
   const front = document.getElementById('card-front-wrap');
   const back = document.getElementById('card-back-wrap');
 
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  if (mode === 'flat-back') {
-    document.getElementById('tabFlatBack').classList.add('active');
+  if (mode === 'flat-front') {
+    document.getElementById('tabFlatFront')?.classList.add('active');
+    wrap.classList.remove('mockup-3d');
+    front.style.display = 'block';
+    back.style.display = 'none';
+  } else if (mode === 'flat-back') {
+    document.getElementById('tabFlatBack')?.classList.add('active');
     wrap.classList.remove('mockup-3d');
     front.style.display = 'none';
     back.style.display = 'block';
   } else if (mode === 'mockup-3d') {
-    document.getElementById('tabMockup3D').classList.add('active');
+    document.getElementById('tabMockup3D')?.classList.add('active');
     wrap.classList.add('mockup-3d');
     front.style.display = 'block';
     back.style.display = 'block';
   } else if (mode === 'flat-both') {
-    document.getElementById('tabFlatBoth').classList.add('active');
+    document.getElementById('tabFlatBoth')?.classList.add('active');
     wrap.classList.remove('mockup-3d');
     front.style.display = 'block';
     back.style.display = 'block';
   }
 }
+
 
 // 3. 색상 및 레이아웃 슬라이더 동기화
 function setColors(bg, main, sub, acc) {
@@ -942,6 +948,105 @@ function exportPrintPDF() {
   });
 }
 
+// ================= 앞면(Front) 로고 업로드 및 렌더링 =================
+let uploadedLogoDataUrl = '';
+
+function handleLogoUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    uploadedLogoDataUrl = e.target.result;
+    const modeSel = document.getElementById('selFrontLogoMode');
+    if (modeSel) modeSel.value = 'upload';
+    updateFrontCard();
+  };
+  reader.readAsDataURL(file);
+}
+
+function resetSingleFront(id, defaultVal) {
+  const el = document.getElementById(id);
+  if (el) {
+    el.value = defaultVal;
+    updateFrontCard();
+  }
+}
+
+function updateFrontCard() {
+  const logoMode = document.getElementById('selFrontLogoMode')?.value || 'monogram';
+  const logoSz = document.getElementById('rFLogoSz')?.value || 64;
+  const logoFilter = document.getElementById('selLogoFilter')?.value || 'none';
+  const layout = document.getElementById('selFrontLayout')?.value || 'center-logo';
+  const lineStyle = document.getElementById('selFrontLine')?.value || 'dia-center';
+  const mainTxt = document.getElementById('inFrontMainText')?.value.trim() ?? 'AIDEN KIM';
+  const subTxt = document.getElementById('inFrontSubText')?.value.trim() ?? '';
+  const frameStyle = document.getElementById('selFrameStyle')?.value || 'corner-bracket';
+
+  if (document.getElementById('vFLogoSz')) {
+    document.getElementById('vFLogoSz').textContent = logoSz + 'px';
+  }
+  document.documentElement.style.setProperty('--f-logo-size', logoSz + 'px');
+
+  // 앞면 전체 구도 클래스 적용
+  const trimFront = document.getElementById('trim-front');
+  if (trimFront) {
+    trimFront.className = 'card-trim-box f-layout-' + layout.toLowerCase();
+  }
+
+  // 앞면 외곽 프레임도 뒷면과 통일
+  const fFrame = document.getElementById('outFrontFrame');
+  if (fFrame) {
+    fFrame.className = 'decor-frame' + (frameStyle !== 'none' ? ' ' + frameStyle : '');
+  }
+
+  // 로고 영역 렌더링
+  const logoArea = document.getElementById('outFrontLogoArea');
+  if (logoArea) {
+    logoArea.style.display = logoMode === 'none' ? 'none' : 'flex';
+    if (logoMode === 'upload') {
+      if (uploadedLogoDataUrl) {
+        const filterCls = logoFilter !== 'none' ? ' ' + logoFilter : '';
+        logoArea.innerHTML = `<img src="${uploadedLogoDataUrl}" class="front-uploaded-logo${filterCls}" alt="Logo" />`;
+      } else {
+        logoArea.innerHTML = `<div class="front-monogram-badge"><span>LOGO</span></div>`;
+      }
+    } else if (logoMode === 'monogram') {
+      const st = (mainTxt || document.getElementById('inStage')?.value || 'A').trim();
+      const initials = st.split(/\s+/).map(w => w[0]).join('').substring(0, 2).toUpperCase();
+      logoArea.innerHTML = `<div class="front-monogram-badge"><span>${initials}</span></div>`;
+    } else if (logoMode === 'symbol') {
+      logoArea.innerHTML = `<div class="front-symbol-mark">◆</div>`;
+    } else {
+      logoArea.innerHTML = '';
+    }
+  }
+
+  // 앞면 텍스트 및 부가정보 렌더링
+  const fStage = document.getElementById('outFrontStage');
+  const fRole = document.getElementById('outFrontRole');
+  if (fStage) {
+    fStage.textContent = mainTxt;
+    fStage.style.display = mainTxt ? 'block' : 'none';
+  }
+  if (fRole) {
+    fRole.textContent = subTxt;
+    fRole.style.display = subTxt ? 'block' : 'none';
+  }
+
+  // 앞면 하단 포인트 라인
+  const lineBox = document.getElementById('outFrontLineBox');
+  if (lineBox) {
+    lineBox.className = 'front-line-box ' + lineStyle;
+    if (lineStyle === 'dia-center' || lineStyle === 'dia-end') {
+      lineBox.innerHTML = `<span class="front-line-gem">◆</span>`;
+    } else {
+      lineBox.innerHTML = '';
+    }
+  }
+
+  saveStateToLocal();
+}
+
 // 초기 실행
 window.onload = () => {
   initSortables();
@@ -960,4 +1065,5 @@ window.onload = () => {
   renderCardContent();
   renderCustomQR();
   updateDecorations();
+  updateFrontCard();
 };

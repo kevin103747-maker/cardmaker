@@ -377,19 +377,96 @@ Vocal Directing, Mixing & Mastering</textarea>
         </div>
       </div>
 
+      <!-- 8. [신규] 앞면(Front) 전용: 내 로고 & 부가정보 설정 -->
+      <div class="panel-box">
+        <div class="panel-title">
+          <span>8. 앞면 (Front) — 내 로고 & 부가정보</span>
+          <button class="btn-xs" onclick="switchView('flat-front')"><i class="fa-solid fa-eye"></i> 앞면 보기</button>
+        </div>
+
+        <div class="grid-2">
+          <div>
+            <label class="lbl">앞면 로고 표시 방식</label>
+            <select id="selFrontLogoMode" class="inp" onchange="updateFrontCard()">
+              <option value="upload">내 로고 이미지 업로드</option>
+              <option value="monogram" selected>타이포 모노그램 (자동)</option>
+              <option value="symbol">미니멀 심볼 (◆ / ♫)</option>
+              <option value="none">로고 없음 (텍스트만)</option>
+            </select>
+          </div>
+          <div>
+            <label class="lbl">로고 이미지 파일 선택</label>
+            <button class="btn-xs" style="width:100%; height:31px; justify-content:center;" onclick="document.getElementById('frontLogoInput').click()">
+              <i class="fa-solid fa-upload"></i> 로고 파일 불러오기 (PNG/SVG)
+            </button>
+            <input type="file" id="frontLogoInput" accept="image/*" style="display:none" onchange="handleLogoUpload(event)">
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div>
+            <label class="lbl"><span>로고 크기</span><span><span class="val-badge" id="vFLogoSz">64px</span> <i class="fa-solid fa-rotate-left sl-reset" onclick="resetSingleFront('rFLogoSz', 64)"></i></span></label>
+            <input type="range" id="rFLogoSz" min="24" max="180" value="64" ondblclick="resetSingleFront('rFLogoSz', 64)" oninput="updateFrontCard()">
+          </div>
+          <div>
+            <label class="lbl">업로드 로고 색상 보정</label>
+            <select id="selLogoFilter" class="inp" onchange="updateFrontCard()">
+              <option value="none" selected>원본 색상 그대로</option>
+              <option value="invert">색상 반전 (어두운 배경용 화이트화)</option>
+              <option value="grayscale">흑백 모노톤 변환</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div>
+            <label class="lbl">앞면 배치 구도</label>
+            <select id="selFrontLayout" class="inp" onchange="updateFrontCard()">
+              <option value="center-logo" selected>1. 정중앙 로고 + 하단 부가정보</option>
+              <option value="original-line">2. 시안 스타일 (좌하단 정렬 + 라인)</option>
+              <option value="Pure-center">3. 정중앙 로고 + 바로 아래 텍스트</option>
+            </select>
+          </div>
+          <div>
+            <label class="lbl">하단 포인트 라인</label>
+            <select id="selFrontLine" class="inp" onchange="updateFrontCard()">
+              <option value="dia-center" selected>중앙 다이아몬드 라인 (── ◆ ──)</option>
+              <option value="dia-end">끝단 다이아몬드 라인 (──── ◆)</option>
+              <option value="short">모던 숏 바 (36px)</option>
+              <option value="full">시안 기본 전체 직선</option>
+              <option value="none">라인 없음</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid-2" style="margin-bottom:0;">
+          <div>
+            <label class="lbl">앞면 메인 문구 (비워두면 예명 자동)</label>
+            <input type="text" id="inFrontMainText" class="inp" value="AIDEN KIM" placeholder="예: 스튜디오명 또는 예명" oninput="updateFrontCard()">
+          </div>
+          <div>
+            <label class="lbl">앞면 부가 정보 (직함 / 슬로건 한 줄)</label>
+            <input type="text" id="inFrontSubText" class="inp" value="MUSIC PRODUCER & COMPOSER" placeholder="비워두면 숨김" oninput="updateFrontCard()">
+          </div>
+        </div>
+      </div>
+
     </div>
 
     <!-- 하단 출력 버튼 -->
     <div class="sidebar-footer">
-      <div class="export-row">
+      <div class="export-row" style="grid-template-columns: 1fr 1fr 1fr 1fr;">
+        <button class="btn-exp" onclick="exportRasterPNG('card-front-wrap', '앞면')">
+          <i class="fa-solid fa-image"></i> 앞면 PNG
+        </button>
         <button class="btn-exp" onclick="exportRasterPNG('card-back-wrap', '뒷면')">
-          <i class="fa-solid fa-image"></i> PNG (고해상도)
+          <i class="fa-solid fa-image"></i> 뒷면 PNG
         </button>
         <button class="btn-exp vec" onclick="exportPureVectorSVG()">
-          <i class="fa-solid fa-bezier-curve"></i> SVG (순수 벡터)
+          <i class="fa-solid fa-bezier-curve"></i> 벡터 SVG
         </button>
         <button class="btn-exp pdf" onclick="exportPrintPDF()">
-          <i class="fa-solid fa-file-pdf"></i> PDF (인쇄소용)
+          <i class="fa-solid fa-file-pdf"></i> 양면 PDF
         </button>
       </div>
     </div>
@@ -399,14 +476,17 @@ Vocal Directing, Mixing & Mastering</textarea>
   <main class="studio-stage">
     <div class="stage-top-bar">
       <div class="toolbar-group">
-        <button class="tab-btn active" id="tabFlatBack" onclick="switchView('flat-back')">
-          <i class="fa-regular fa-id-card"></i> 뒷면 (인쇄 정면 뷰)
+        <button class="tab-btn" id="tabFlatFront" onclick="switchView('flat-front')">
+          <i class="fa-regular fa-credit-card"></i> 앞면 (로고 면)
         </button>
-        <button class="tab-btn" id="tabMockup3D" onclick="switchView('mockup-3d')">
-          <i class="fa-solid fa-cube"></i> 3D 목업 뷰 (앞+뒤)
+        <button class="tab-btn active" id="tabFlatBack" onclick="switchView('flat-back')">
+          <i class="fa-regular fa-id-card"></i> 뒷면 (정보 면)
         </button>
         <button class="tab-btn" id="tabFlatBoth" onclick="switchView('flat-both')">
           <i class="fa-solid fa-layer-group"></i> 앞·뒷면 동시 보기
+        </button>
+        <button class="tab-btn" id="tabMockup3D" onclick="switchView('mockup-3d')">
+          <i class="fa-solid fa-cube"></i> 3D 목업 뷰
         </button>
       </div>
       <div class="autosave-indicator" id="autoSaveBadge">
@@ -416,7 +496,7 @@ Vocal Directing, Mixing & Mastering</textarea>
 
     <div class="stage-canvas-wrap show-guides" id="stageWrap">
 
-      <!-- [앞면 명함 컨테이너] -->
+      <!-- [앞면 명함 컨테이너: 로고 + 심플 부가정보] -->
       <div class="card-bleed-container" id="card-front-wrap" style="display:none;">
         <div class="print-guides-overlay">
           <div class="guide-trim-line">
@@ -427,14 +507,17 @@ Vocal Directing, Mixing & Mastering</textarea>
           </div>
           <div class="guide-safe-zone"></div>
         </div>
-        <div class="card-trim-box" id="trim-front">
-          <div>
-            <div class="front-name-wrap">
-              <span class="front-stage" id="outFrontStage">AIDEN KIM</span>
-              <span class="front-real" id="outFrontReal">에이든 · 김도현</span>
-            </div>
-            <div class="front-role" id="outFrontRole">Music Producer & Composer</div>
-            <div class="front-line"></div>
+        <div class="card-trim-box f-layout-center-logo" id="trim-front">
+          <div class="decor-frame" id="outFrontFrame"></div>
+
+          <!-- 로고 영역 (업로드 이미지 또는 모노그램) -->
+          <div class="front-logo-area" id="outFrontLogoArea"></div>
+
+          <!-- 하단 부가정보 영역 -->
+          <div class="front-info-area">
+            <div class="front-main-title" id="outFrontStage">AIDEN KIM</div>
+            <div class="front-sub-info" id="outFrontRole">MUSIC PRODUCER & COMPOSER</div>
+            <div class="front-line-box dia-center" id="outFrontLineBox"></div>
           </div>
         </div>
       </div>
