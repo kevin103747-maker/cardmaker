@@ -804,7 +804,7 @@ function prepareForCleanCapture(callback) {
   }, 150);
 }
 
-// html2canvas의 createPattern(width/height 0) 버그를 원천 차단하는 안전 캡처 옵션
+// html2canvas가 createPattern을 아예 호출하지 못하도록 모든 gradient/pattern 배경을 원천 차단하는 캡처 옵션
 function getCanvasOptions() {
   return {
     scale: 3,
@@ -812,16 +812,17 @@ function getCanvasOptions() {
     allowTaint: true,
     backgroundColor: null,
     onclone: (clonedDoc) => {
-      // 1) createPattern 에러의 주범인 노이즈 배경(::after) 및 다중 linear-gradient 배경을 캡처본에서 안전하게 처리
+      // 1) 부모(.studio-stage)의 radial-gradient를 포함해 모든 요소의 background-image(그라데이션/패턴)를 강제 해제!
+      //    이렇게 하면 html2canvas 내부에서 createPattern() 자체가 호출되지 않아 width/height 0 에러가 100% 사라집니다.
       const styleFix = clonedDoc.createElement('style');
       styleFix.textContent = `
-        .card-bleed-container::after { display: none !important; }
-        .decor-bg-pattern { background: none !important; }
-        .decor-frame.corner-bracket, .qr-box.framed { background: none !important; }
+        *, *::before, *::after {
+          background-image: none !important;
+        }
       `;
       clonedDoc.head.appendChild(styleFix);
 
-      // 2) 코너 브래킷(.corner-bracket)과 QR 뷰파인더(.qr-box.framed)를 에러 없는 순수 border 조각으로 복원
+      // 2) 코너 브래킷(.corner-bracket)과 QR 뷰파인더(.qr-box.framed)를 순수 border 조각으로 복원
       const acc = document.getElementById('cAcc')?.value || '#181818';
       const drawCorners = (el, size, weight, color) => {
         const pos = [
@@ -843,11 +844,16 @@ function getCanvasOptions() {
       const fAcc = getComputedStyle(document.documentElement).getPropertyValue('--f-accent').trim() || acc;
       clonedDoc.querySelectorAll('#card-front-wrap .decor-frame.corner-bracket').forEach(el => drawCorners(el, 16, 1.2, fAcc));
 
-      // 3) QR코드 인라인 SVG에 명시적 픽셀 크기 부여
+      // 3) QR코드 인라인 SVG에 명시적 픽셀 크기 부여 및 이미지 변환
+      const qrSz = document.getElementById('rQrSz')?.value || 142;
       const svgs = clonedDoc.querySelectorAll('#outQrBox svg');
       svgs.forEach(svgEl => {
+        svgEl.setAttribute('width', qrSz);
+        svgEl.setAttribute('height', qrSz);
         const xml = new XMLSerializer().serializeToString(svgEl);
         const img = clonedDoc.createElement('img');
+        img.width = parseInt(qrSz);
+        img.height = parseInt(qrSz);
         img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(xml);
         img.style.width = '100%';
         img.style.height = '100%';
