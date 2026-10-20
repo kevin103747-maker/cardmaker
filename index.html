@@ -202,8 +202,12 @@
           <div>
             <label class="lbl">서비스 디자인 모드</label>
             <select id="selServiceMode" class="inp" onchange="renderCardContent()">
-              <option value="text">시안 오리지널 텍스트형</option>
-              <option value="pills">미니멀 캡슐 태그형</option>
+              <option value="track-grid" selected>1. 트랙 넘버 2단 그리드 (01 작곡  02 편곡)</option>
+              <option value="dia-inline">2. 다이아몬드 모듈러 (작곡 ◆ 편곡 ◆ 작사)</option>
+              <option value="accent-bar">3. 좌측 버티컬 바 (▎ 에디토리얼 블록)</option>
+              <option value="slash-modern">4. 타이포 슬래시 (작곡  /  편곡  /  작사)</option>
+              <option value="credit-split">5. 스튜디오 크레딧 2줄 정렬</option>
+              <option value="text">기본 텍스트 줄글</option>
             </select>
           </div>
         </div>
