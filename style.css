@@ -1253,3 +1253,13 @@ input[type="range"] {
   width: 4.5px;
   height: 4.5px;
 }
+/* 가상요소의 ◆ 문자가 캡처 시 [☒]로 깨지지 않도록 순수 도형으로 덮어쓰기 */
+.decor-name-rule.dia-rule::after,
+.decor-top-stamp::before {
+  content: "" !important;
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  background-color: var(--accent);
+  transform: rotate(45deg);
+}

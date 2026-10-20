@@ -806,53 +806,93 @@ function prepareForCleanCapture(callback) {
 
 
 
-// FontAwesome 아이콘이 [☒]로 깨지지 않도록 폰트 파일까지 Base64로 내장시키는 캐시 함수
-let cachedFontAwesomeCSS = null;
-async function ensureFontAwesomeEmbedded() {
-  if (cachedFontAwesomeCSS) return;
-  try {
-    const cssUrl = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css';
-    const res = await fetch(cssUrl);
-    let cssText = await res.text();
+// 모든 아이콘(FontAwesome)과 특수기호(◆, ◇, •, ↗)를 폰트가 아닌 100% 순수 SVG 벡터 도형으로 그리는 사전
+const ICON_SVG_PATHS = {
+  'fa-phone': '<path fill="currentColor" d="M164.9 24.6c-7.7-18.6-28-28.5-47.4-23.2l-88 24C12.1 30.2 0 46 0 64C0 311.4 200.6 512 448 512c18 0 33.8-12.1 38.6-29.5l24-88c5.3-19.4-4.6-39.7-23.2-47.4l-96-40c-16.3-6.8-35.2-2.1-46.3 11.6L304.7 368C234.3 334.7 177.3 277.7 144 207.3L193.3 167c13.7-11.2 18.4-30 11.6-46.3l-40-96z"/>',
+  'fa-envelope': '<path fill="currentColor" d="M48 64C21.5 64 0 85.5 0 112c0 15.1 7.1 29.3 19.2 38.4L236.8 313.6c11.4 8.5 27 8.5 38.4 0L492.8 150.4c12.1-9.1 19.2-23.3 19.2-38.4c0-26.5-21.5-48-48-48H48zM0 176V384c0 35.3 28.7 64 64 64H448c35.3 0 64-28.7 64-64V176L294.4 339.2c-22.8 17.1-54 17.1-76.8 0L0 176z"/>',
+  'fa-globe': '<path fill="currentColor" d="M352 256c0 22.2-1.2 43.6-3.3 64H163.3c-2.2-20.4-3.3-41.8-3.3-64s1.2-43.6 3.3-64H348.7c2.2 20.4 3.3 41.8 3.3 64zm28.8-64H503.9c5.3 20.5 8.1 41.9 8.1 64s-2.8 43.5-8.1 64H380.8c2.1-20.6 3.2-42 3.2-64s-1.1-43.4-3.2-64zm112.6-32H376.7c-10-63.9-29.8-117.4-55.3-151.6c78.3 20.7 142 77.5 171.9 151.6zm-149.1 0H167.7c6.1-36.4 15.5-68.6 27-94.7c10.5-23.6 22.2-40.7 33.5-51.5C239.4 3.2 248.7 0 256 0s16.6 3.2 27.8 13.8c11.3 10.8 23 27.9 33.5 51.5c11.6 26 20.9 58.2 27 94.7zm-209 0H18.6C48.6 85.9 112.2 29.1 190.6 8.4C165.1 42.6 145.3 96.1 135.3 160zM8.1 192H131.2c-2.1 20.6-3.2 42-3.2 64s1.1 43.4 3.2 64H8.1C2.8 299.5 0 278.1 0 256s2.8-43.5 8.1-64zM194.7 446.6c-11.6-26-20.9-58.2-27-94.6H344.3c-6.1 36.4-15.5 68.6-27 94.6c-10.5 23.6-22.2 40.7-33.5 51.5C272.6 508.8 263.3 512 256 512s-16.6-3.2-27.8-13.8c-11.3-10.8-23-27.9-33.5-51.5zM135.3 352c10 63.9 29.8 117.4 55.3 151.6C112.2 482.9 48.6 426.1 18.6 352H135.3zm358.1 0c-30 74.1-93.6 130.9-171.9 151.6c25.5-34.2 45.2-87.7 55.3-151.6H493.4z"/>',
+  'fa-discord': '<path fill="currentColor" d="M524.5 69.8a1.5 1.5 0 0 0 -.8-.7A485.1 485.1 0 0 0 404.1 32a1.8 1.8 0 0 0 -1.9 .9 337.5 337.5 0 0 0 -14.9 30.6 447.8 447.8 0 0 0 -134.4 0 309.5 309.5 0 0 0 -15.1-30.6 1.9 1.9 0 0 0 -1.9-.9A483.7 483.7 0 0 0 116.1 69.1a1.7 1.7 0 0 0 -.8 .7C39.1 183.7 18.2 294.7 28.4 404.4a2 2 0 0 0 .8 1.4A487.7 487.7 0 0 0 176 479.9a1.9 1.9 0 0 0 2.1-.7A348.2 348.2 0 0 0 208.1 430.4a1.9 1.9 0 0 0 -1-2.6 321.2 321.2 0 0 1 -45.9-21.9 1.9 1.9 0 0 1 -.2-3.1c3.1-2.3 6.2-4.7 9.1-7.1a1.8 1.8 0 0 1 1.9-.3c96.2 43.9 200.4 43.9 295.5 0a1.8 1.8 0 0 1 1.9 .2c2.9 2.4 6 4.9 9.1 7.2a1.9 1.9 0 0 1 -.2 3.1 301.4 301.4 0 0 1 -45.9 21.8 1.9 1.9 0 0 0 -1 2.6 391.1 391.1 0 0 0 30 48.8 1.9 1.9 0 0 0 2.1 .7A486 486 0 0 0 610.7 405.7a1.9 1.9 0 0 0 .8-1.4C623.7 277.6 590.9 167.5 524.5 69.8zM222.5 337.6c-29 0-52.8-26.6-52.8-59.2S193.1 219.1 222.5 219.1c29.7 0 53.3 26.8 52.8 59.2C275.3 311 251.9 337.6 222.5 337.6zm195.4 0c-29 0-52.8-26.6-52.8-59.2S388.4 219.1 417.9 219.1c29.7 0 53.3 26.8 52.8 59.2C470.7 311 447.5 337.6 417.9 337.6z"/>',
+  'fa-instagram': '<path fill="currentColor" d="M224.1 141c-63.6 0-114.9 51.3-114.9 114.9s51.3 114.9 114.9 114.9S339 319.5 339 255.9 287.7 141 224.1 141zm0 189.6c-41.1 0-74.7-33.5-74.7-74.7s33.5-74.7 74.7-74.7 74.7 33.5 74.7 74.7-33.6 74.7-74.7 74.7zm146.4-194.3c0 14.9-12 26.8-26.8 26.8-14.9 0-26.8-12-26.8-26.8s12-26.8 26.8-26.8 26.8 12 26.8 26.8zm76.1 27.2c-1.7-35.9-9.9-67.7-36.2-93.9-26.2-26.2-58-34.4-93.9-36.2-37-2.1-147.9-2.1-184.9 0-35.8 1.7-67.6 9.9-93.9 36.1s-34.4 58-36.2 93.9c-2.1 37-2.1 147.9 0 184.9 1.7 35.9 9.9 67.7 36.2 93.9s58 34.4 93.9 36.2c37 2.1 147.9 2.1 184.9 0 35.9-1.7 67.7-9.9 93.9-36.2 26.2-26.2 34.4-58 36.2-93.9 2.1-37 2.1-147.8 0-184.8zM398.8 388c-7.8 19.6-22.9 34.7-42.6 42.6-29.5 11.7-99.5 9-132.1 9s-102.7 2.6-132.1-9c-19.6-7.8-34.7-22.9-42.6-42.6-11.7-29.5-9-99.5-9-132.1s-2.6-102.7 9-132.1c7.8-19.6 22.9-34.7 42.6-42.6 29.5-11.7 99.5-9 132.1-9s102.7-2.6 132.1 9c19.6 7.8 34.7 22.9 42.6 42.6 11.7 29.5 9 99.5 9 132.1s2.7 102.7-9 132.1z"/>',
+  'fa-soundcloud': '<path fill="currentColor" d="M111.4 256.3l5.8 65-5.8 68.3c-.3 2.5-2.2 4.4-4.4 4.4s-4.2-1.9-4.2-4.4l-5.6-68.3 5.6-65c0-2.5 1.9-4.4 4.2-4.4 2.2 0 4.1 1.9 4.4 4.4zm21.4-19.2l5.6 84.2-5.6 68.3c-.3 2.5-1.9 4.4-4.2 4.4-2.5 0-4.2-1.9-4.4-4.4l-5.6-68.3 5.6-84.2c.3-2.5 1.9-4.4 4.4-4.4 2.2 0 3.9 1.9 4.2 4.4zm21.4-12.5l5.8 96.7-5.8 68.3c-.3 2.5-2.2 4.4-4.4 4.4s-4.2-1.9-4.4-4.4l-5.6-68.3 5.6-96.7c.3-2.5 2.2-4.4 4.4-4.4s4.1 1.9 4.4 4.4zm21.7 3.1l5.6 93.6-5.6 68.3c-.3 2.5-2.2 4.4-4.4 4.4-2.5 0-4.2-1.9-4.4-4.4l-5.6-68.3 5.6-93.6c.3-2.5 1.9-4.7 4.4-4.7 2.2 0 4.1 2.2 4.4 4.7zm22 10.8l5.3 82.8-5.3 68.3c-.3 2.8-2.2 4.7-4.7 4.7s-4.4-1.9-4.7-4.7l-5.3-68.3 5.3-82.8c.3-2.8 2.2-4.7 4.7-4.7s4.4 1.9 4.7 4.7zm299.1 59.2c-6.7 0-13.1 1.4-19.2 3.9-15.8-64.7-73.9-112.8-143.3-112.8-18.6 0-36.7 3.6-53.1 10.6-6.4 2.5-8.1 5-8.1 10v202.2c0 5.3 4.2 9.7 9.4 10h214.2c45.3 0 82-36.7 82-81.9 0-45.3-36.7-82-81.9-82z"/>',
+  'fa-youtube': '<path fill="currentColor" d="M549.7 124.1c-6.3-23.7-24.8-42.3-48.3-48.6C458.8 64 288 64 288 64S117.2 64 74.6 75.5c-23.5 6.3-42 24.9-48.3 48.6-11.4 42.9-11.4 132.3-11.4 132.3s0 89.4 11.4 132.3c6.3 23.7 24.8 41.5 48.3 47.8C117.2 448 288 448 288 448s170.8 0 213.4-11.5c23.5-6.3 42-24.2 48.3-47.8 11.4-42.9 11.4-132.3 11.4-132.3s0-89.4-11.4-132.3zm-317.5 213.5V175.2l142.7 81.2-142.7 81.2z"/>',
+  'fa-spotify': '<path fill="currentColor" d="M248 8C111.1 8 0 119.1 0 256s111.1 248 248 248 248-111.1 248-248S384.9 8 248 8zm100.7 364.9c-4.2 0-6.8-1.3-10.7-3.6-62.4-37.6-135-39.2-206.7-24.5-3.9 1-9 2.6-11.9 2.6-9.7 0-15.8-7.7-15.8-15.8 0-10.3 6.1-15.2 13.6-16.8 81.9-18.1 165.6-16.5 237 26.2 6.1 3.9 9.7 7.4 9.7 16.5s-7.1 15.4-15.2 15.4zm26.9-65.6c-5.2 0-8.7-2.3-12.3-4.2-62.5-37-155.7-51.9-238.6-29.4-4.8 1.3-7.4 2.6-11.9 2.6-10.7 0-19.4-8.7-19.4-19.4s5.2-17.8 15.5-20.7c27.8-7.8 56.2-13.6 97.8-13.6 64.9 0 127.6 16.1 177 45.5 8.1 4.8 11.3 11 11.3 19.7-.1 10.8-8.5 19.5-19.4 19.5zm31-76.2c-5.2 0-8.4-1.3-12.9-3.9-71.2-42.5-198.5-52.7-280.9-29.7-3.6 1-8.1 2.6-12.9 2.6-13.2 0-23.3-10.3-23.3-23.6 0-13.6 8.4-21.3 17.4-23.9 35.2-10.3 74.6-15.2 117.5-15.2 73 0 149.5 15.2 205.4 47.8 7.8 4.5 12.9 10.7 12.9 22.6 0 13.6-11 23.3-23.2 23.3z"/>',
+  'fa-comment': '<path fill="currentColor" d="M512 240c0 114.9-114.6 208-256 208c-37.1 0-72.3-6.4-104.1-17.9c-11.9 8.7-31.3 20.6-54.3 30.6C73.6 471.1 44.7 480 16 480c-6.5 0-12.3-3.9-14.8-9.9c-2.5-6-1.1-12.8 3.4-17.4l0 0 0 0 0 0 0 0 .3-.3c.3-.3 .7-.7 1.3-1.4c1.1-1.2 2.8-3.1 4.9-5.7c4.1-5 9.6-12.4 15.2-21.6c10-16.6 19.5-38.4 21.4-62.9C17.7 326.8 0 285.1 0 240C0 125.1 114.6 32 256 32s256 93.1 256 208z"/>',
+  'fa-location-dot': '<path fill="currentColor" d="M215.7 499.2C267 435 384 279.4 384 192C384 86 298 0 192 0S0 86 0 192c0 87.4 117 243 168.3 307.2c12.3 15.3 35.1 15.3 47.4 0zM192 128a64 64 0 1 1 0 128 64 64 0 1 1 0-128z"/>',
+  'fa-facebook-f': '<path fill="currentColor" d="M80 299.3V512H196V299.3h86.5l18-97.8H196V166.9c0-51.7 20.3-71.5 72.7-71.5c16.3 0 29.4 .4 37 1.2V7.9C291.4 4 256.4 0 236.2 0C129.3 0 80 50.5 80 159.4v42.1H14v97.8H80z"/>',
+  'fa-twitter': '<path fill="currentColor" d="M459.4 151.7c.3 4.5 .3 9.1 .3 13.6 0 138.7-105.6 298.6-298.6 298.6-59.5 0-114.7-17.2-161.1-47.1 8.4 1 16.6 1.3 25.3 1.3 49.1 0 94.2-16.6 130.3-44.8-46.1-1-84.8-31.2-98.1-72.8 6.5 1 13 1.6 19.8 1.6 9.4 0 18.8-1.3 27.6-3.6-48.1-9.7-84.1-52-84.1-103v-1.3c14 7.8 30.2 12.7 47.4 13.3-28.3-18.8-46.8-51-46.8-87.4 0-19.5 5.2-37.4 14.3-53 51.7 63.7 129.3 105.3 216.4 109.8-1.6-7.8-2.6-15.9-2.6-24 0-57.8 46.8-104.9 104.9-104.9 30.2 0 57.5 12.7 76.7 33.1 23.7-4.5 46.5-13.3 66.6-25.3-7.8 24.4-24.4 44.8-46.1 57.8 21.1-2.3 41.6-8.1 60.4-16.2-14.3 20.8-32.2 39.3-52.6 54.3z"/>',
+  'fa-x-twitter': '<path fill="currentColor" d="M389.2 48h70.6L305.6 224.2 487 464H345L233.7 318.6 106.5 464H35.8L200.7 275.5 26.8 48H172.4L272.9 180.9 389.2 48zM364.4 421.8h39.1L151.1 88h-42L364.4 421.8z"/>',
+  'fa-itunes-note': '<path fill="currentColor" d="M499.1 6.3c8.1 6 12.9 15.6 12.9 25.7v72V368c0 44.2-43 80-96 80s-96-35.8-96-80s43-80 96-80c11.2 0 22 1.6 32 4.6V147L192 223.8V432c0 44.2-43 80-96 80s-96-35.8-96-80s43-80 96-80c11.2 0 22 1.6 32 4.6V200 128c0-14.1 9.3-26.6 22.8-30.7l320-96c9.7-2.9 20.2-1.1 28.3 5z"/>',
+  'fa-tiktok': '<path fill="currentColor" d="M448 209.9a210.1 210.1 0 0 1 -122.8-39.3V349.4A162.6 162.6 0 1 1 185 188.3V278.2a74.6 74.6 0 1 0 52.2 71.2V0l88 0a121.2 121.2 0 0 0 1.9 22.2h0A122.2 122.2 0 0 0 381 102.4a121.4 121.4 0 0 0 67 20.1z"/>',
+  'fa-backward-step': '<path fill="currentColor" d="M267.5 440.6c9.5 7.9 22.8 9.7 34.1 4.4s18.4-16.6 18.4-29V96c0-12.4-7.2-23.7-18.4-29s-24.5-3.6-34.1 4.4l-192 160L64 241V96c0-17.7-14.3-32-32-32S0 78.3 0 96V416c0 17.7 14.3 32 32 32s32-14.3 32-32V271l11.5 9.6 192 160z"/>',
+  'fa-play': '<path fill="currentColor" d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80V432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"/>',
+  'fa-forward-step': '<path fill="currentColor" d="M52.5 440.6c-9.5 7.9-22.8 9.7-34.1 4.4S0 428.4 0 416V96C0 83.6 7.2 72.3 18.4 67s24.5-3.6 34.1 4.4l192 160L256 241V96c0-17.7 14.3-32 32-32s32 14.3 32 32V416c0 17.7-14.3 32-32 32s-32-14.3-32-32V271l-11.5 9.6-192 160z"/>'
+};
 
-    // CSS 안의 상대경로(../webfonts/...) 폰트 파일들을 실제 데이터(Base64)로 변환하여 [☒] 깨짐 원천 차단
-    const urlRegex = /url\(["']?(\.\.\/webfonts\/[^"')]+)["']?\)/g;
-    const matches = [...cssText.matchAll(urlRegex)];
-    const uniquePaths = [...new Set(matches.map(m => m[1]))];
+// 화면의 모든 <i> 아이콘과 특수문자(◆, ↗ 등)를 캡처 직전 순수 SVG 도형으로 변환하여 [☒] 깨짐을 100% 차단!
+function convertIconsAndSymbolsToPureSVG(rootEl) {
+  const backup = [];
 
-    for (const relPath of uniquePaths) {
-      const fullUrl = relPath.replace('../', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/');
-      const fontRes = await fetch(fullUrl);
-      const blob = await fontRes.blob();
-      const base64 = await new Promise(resolve => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result);
-        reader.readAsDataURL(blob);
-      });
-      cssText = cssText.split(relPath).join(base64);
+  // 1) 모든 FontAwesome <i> 태그를 순수 인라인 <svg>로 치환
+  rootEl.querySelectorAll('i').forEach(iconEl => {
+    const cls = iconEl.className || '';
+    const matchKey = Object.keys(ICON_SVG_PATHS).find(k => cls.includes(k));
+    if (matchKey) {
+      const computed = window.getComputedStyle(iconEl);
+      const sz = computed.fontSize || '13px';
+      const color = computed.color || 'currentColor';
+      const vb = matchKey === 'fa-discord' ? '0 0 640 512' : (matchKey === 'fa-youtube' ? '0 0 576 512' : (matchKey === 'fa-facebook-f' ? '0 0 320 512' : '0 0 512 512'));
+
+      const svgSpan = document.createElement('span');
+      svgSpan.style.cssText = `display:inline-flex;align-items:center;justify-content:center;width:${sz};height:${sz};color:${color};`;
+      svgSpan.innerHTML = `<svg viewBox="${vb}" style="width:100%;height:100%;display:block;fill:currentColor;">${ICON_SVG_PATHS[matchKey]}</svg>`;
+
+      backup.push({ parent: iconEl.parentNode, orig: iconEl, temp: svgSpan });
+      iconEl.parentNode.replaceChild(svgSpan, iconEl);
     }
+  });
 
-    const styleEl = document.createElement('style');
-    styleEl.id = 'fa-embedded-style';
-    styleEl.textContent = cssText;
-    document.head.appendChild(styleEl);
-    cachedFontAwesomeCSS = true;
-  } catch (e) {
-    console.warn('폰트 임베딩 참고:', e);
-  }
+  // 2) 텍스트 노드 안의 특수기호(◆, ◇, ↗)가 [☒]로 깨지거나 작아지지 않도록 SVG 도형으로 치환
+  const diaElements = rootEl.querySelectorAll('.srv-sep-dia, .front-line-gem, .front-symbol-mark, #outDividerGem, #outQrCaption');
+  diaElements.forEach(el => {
+    const oldHtml = el.innerHTML;
+    if (oldHtml.includes('◆') || oldHtml.includes('◇') || oldHtml.includes('↗')) {
+      backup.push({ el, oldHtml });
+      const computed = window.getComputedStyle(el);
+      const sz = parseFloat(computed.fontSize) || 8;
+      const diamondSvg = `<svg viewBox="0 0 10 10" style="width:${sz}px;height:${sz}px;display:inline-block;vertical-align:middle;fill:currentColor;"><polygon points="5,0 10,5 5,10 0,5"/></svg>`;
+      const hollowSvg = `<svg viewBox="0 0 10 10" style="width:${sz}px;height:${sz}px;display:inline-block;vertical-align:middle;fill:none;stroke:currentColor;stroke-width:1.4;"><polygon points="5,1 9,5 5,9 1,5"/></svg>`;
+      const arrowSvg = `<svg viewBox="0 0 10 10" style="width:${sz}px;height:${sz}px;display:inline-block;vertical-align:middle;fill:none;stroke:currentColor;stroke-width:1.5;"><path d="M2,8 L8,2 M4,2 L8,2 L8,6"/></svg>`;
+
+      el.innerHTML = oldHtml
+        .replace(/◆/g, diamondSvg)
+        .replace(/◇/g, hollowSvg)
+        .replace(/↗/g, arrowSvg);
+    }
+  });
+
+  return () => {
+    backup.forEach(item => {
+      if (item.temp && item.parent) {
+        item.parent.replaceChild(item.orig, item.temp);
+      } else if (item.el) {
+        item.el.innerHTML = item.oldHtml;
+      }
+    });
+  };
 }
 
-// createPattern 에러 제로 + [☒] 아이콘 깨짐 제로 + 이상한 띄어쓰기 제로 캡처 함수
 async function captureCardToDataUrl(targetEl, scaleRatio = 3) {
-  await ensureFontAwesomeEmbedded();
   await document.fonts.ready;
-
-  // 캡처 시 특수문자 다이아몬드(◆)가 작아지지 않도록 모든 ◆ 텍스트를 순수 도형으로 보장
-  return await htmlToImage.toPng(targetEl, {
-    pixelRatio: scaleRatio,
-    cacheBust: true,
-    skipFonts: false
-  });
+  const restoreIcons = convertIconsAndSymbolsToPureSVG(targetEl);
+  try {
+    return await htmlToImage.toPng(targetEl, {
+      pixelRatio: scaleRatio,
+      cacheBust: true,
+      skipFonts: false
+    });
+  } finally {
+    restoreIcons();
+  }
 }
 
 function exportRasterPNG(targetId, label) {
