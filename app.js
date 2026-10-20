@@ -1027,10 +1027,32 @@ function handleLogoUpload(event) {
     uploadedLogoDataUrl = e.target.result;
     const modeSel = document.getElementById('selFrontLogoMode');
     if (modeSel) modeSel.value = 'upload';
-    updateFrontCard();
+
+    // 업로드된 로고 이미지의 모서리(0,0) 원본 픽셀 색상을 직접 추출하여 앞면 배경색과 100% 일치시킴!
+    const img = new Image();
+    img.onload = () => {
+      const cvs = document.createElement('canvas');
+      cvs.width = 1;
+      cvs.height = 1;
+      const ctx = cvs.getContext('2d');
+      ctx.drawImage(img, 0, 0, 1, 1, 0, 0, 1, 1);
+      const [r, g, b, a] = ctx.getImageData(0, 0, 1, 1).data;
+
+      // 투명 배경(PNG)이 아니라 배경색이 있는 로고라면 그 색상을 앞면 배경색으로 즉시 자동 적용!
+      if (a > 200) {
+        const hex = '#' + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join('');
+        const colMode = document.getElementById('selFrontColorMode');
+        const fBgInput = document.getElementById('cFBg');
+        if (colMode) colMode.value = 'custom';
+        if (fBgInput) fBgInput.value = hex;
+      }
+      updateFrontCard();
+    };
+    img.src = uploadedLogoDataUrl;
   };
   reader.readAsDataURL(file);
 }
+
 
 function resetSingleFront(id, defaultVal) {
   const el = document.getElementById(id);

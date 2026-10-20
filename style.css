@@ -1263,3 +1263,8 @@ input[type="range"] {
   background-color: var(--accent);
   transform: rotate(45deg);
 }
+
+/* 로고 배경색과 명함 배경색이 1px의 오차도 없이 100% 일치하도록 노이즈 오버레이 제거 */
+.card-bleed-container::after {
+  display: none !important;
+}
