@@ -262,20 +262,7 @@ Vocal Directing, Mixing & Mastering</textarea>
         <div class="grid-3">
           <div>
             <label class="lbl">QR 패턴 모양</label>
-            <select id="selQrModule" class="inp" onchange="renderCustomQR()">
-              <option value="square">클래식 정사각</option>
-              <option value="rounded" selected>소프트 라운드</option>
-              <option value="dots">원형 도트 (Dots)</option>
-            </select>
-          </div>
-          <div>
-            <label class="lbl">모서리 파인더</label>
-            <select id="selQrEye" class="inp" onchange="renderCustomQR()">
-              <option value="square">직각 프레임</option>
-              <option value="rounded" selected>라운드 프레임</option>
-              <option value="circle">원형 프레임</option>
-            </select>
-          </div>
+        <div class="grid-2">
           <div>
             <label class="lbl">QR 상단 캡션 태그</label>
             <select id="selQrCaption" class="inp" onchange="updateDecorations()">
@@ -285,11 +272,12 @@ Vocal Directing, Mixing & Mastering</textarea>
               <option value="none">캡션 없음</option>
             </select>
           </div>
+          <div>
+            <label class="lbl"><span>QR코드 크기</span><span><span class="val-badge" id="vQrSz">142px</span> <i class="fa-solid fa-rotate-left sl-reset" onclick="resetSingleSlider('rQrSz', 142)"></i></span></label>
+            <input type="range" id="rQrSz" min="110" max="170" value="142" ondblclick="resetSingleSlider('rQrSz', 142)" oninput="updateLayoutVars()">
+          </div>
         </div>
-        <div class="field-row">
-          <label class="lbl"><span>QR코드 크기</span><span><span class="val-badge" id="vQrSz">142px</span> <i class="fa-solid fa-rotate-left sl-reset" onclick="resetSingleSlider('rQrSz', 142)"></i></span></label>
-          <input type="range" id="rQrSz" min="110" max="170" value="142" ondblclick="resetSingleSlider('rQrSz', 142)" oninput="updateLayoutVars()">
-        </div>
+
         <div class="grid-2" style="margin-top:10px;">
           <div>
             <label class="lbl">소셜 계정 (@핸들)</label>

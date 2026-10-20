@@ -4,6 +4,7 @@ const CONTACT_CATALOG = [
   { label: '전화 (Phone)', value: 'fa-solid fa-phone' },
   { label: '이메일 (Mail)', value: 'fa-solid fa-envelope' },
   { label: '웹사이트 (Web)', value: 'fa-solid fa-globe' },
+  { label: '디스코드 (Discord)', value: 'fa-brands fa-discord' },
   { label: '인스타그램', value: 'fa-brands fa-instagram' },
   { label: '사운드클라우드', value: 'fa-brands fa-soundcloud' },
   { label: '유튜브', value: 'fa-brands fa-youtube' },
@@ -11,6 +12,7 @@ const CONTACT_CATALOG = [
   { label: '카카오톡/메신저', value: 'fa-solid fa-comment' },
   { label: '스튜디오 위치', value: 'fa-solid fa-location-dot' }
 ];
+
 
 const SOCIAL_CATALOG = [
   { label: 'Facebook (f)', value: 'fa-brands fa-facebook-f' },
@@ -333,58 +335,31 @@ function resetIconOffsets(target) {
   updateDecorations();
 }
 
-// 5. 커스텀 QR코드 엔진 (내부 심볼 제거로 스캔 인식률 & 밀도 최적화)
+// 5. 틈새 제로(Seamless) 클래식 정사각 & 직각 프레임 고정 QR 엔진
 function renderCustomQRSvgString() {
-  const url = document.getElementById('inQrUrl').value.trim() || 'https://example.com';
-  const acc = document.getElementById('cAcc').value;
-  const modStyle = document.getElementById('selQrModule').value;
-  const eyeStyle = document.getElementById('selQrEye').value;
+  const url = document.getElementById('inQrUrl')?.value.trim() || 'https://example.com';
+  const acc = document.getElementById('cAcc')?.value || '#181818';
 
-  const qr = qrcode(0, 'M'); // 깔끔한 밀도를 위해 M 레벨 사용
+  const qr = qrcode(0, 'M');
   qr.addData(url);
   qr.make();
   const count = qr.getModuleCount();
 
-  let svg = `<svg viewBox="0 0 ${count} ${count}" xmlns="http://www.w3.org/2000/svg">`;
-
+  // 모든 검은색 모듈을 하나의 단일 Path로 병합하여 조각 사이의 미세한 틈새(실금)를 원천 차단
+  let pathData = '';
   for (let r = 0; r < count; r++) {
     for (let c = 0; c < count; c++) {
-      if (isFinderPattern(r, c, count)) continue;
-
       if (qr.isDark(r, c)) {
-        if (modStyle === 'dots') {
-          svg += `<circle cx="${c + 0.5}" cy="${r + 0.5}" r="0.43" fill="${acc}"/>`;
-        } else if (modStyle === 'rounded') {
-          svg += `<rect x="${c + 0.06}" y="${r + 0.06}" width="0.88" height="0.88" rx="0.28" fill="${acc}"/>`;
-        } else {
-          svg += `<rect x="${c}" y="${r}" width="1.02" height="1.02" fill="${acc}"/>`;
-        }
+        pathData += `M${c},${r}h1v1h-1z `;
       }
     }
   }
 
-  const eyeCoords = [
-    { x: 0, y: 0 },
-    { x: count - 7, y: 0 },
-    { x: 0, y: count - 7 }
-  ];
-
-  eyeCoords.forEach(pos => {
-    if (eyeStyle === 'circle') {
-      svg += `<circle cx="${pos.x + 3.5}" cy="${pos.y + 3.5}" r="3" fill="none" stroke="${acc}" stroke-width="1"/>`;
-      svg += `<circle cx="${pos.x + 3.5}" cy="${pos.y + 3.5}" r="1.5" fill="${acc}"/>`;
-    } else if (eyeStyle === 'rounded') {
-      svg += `<rect x="${pos.x + 0.5}" y="${pos.y + 0.5}" width="6" height="6" rx="1.6" fill="none" stroke="${acc}" stroke-width="1"/>`;
-      svg += `<rect x="${pos.x + 2}" y="${pos.y + 2}" width="3" height="3" rx="0.8" fill="${acc}"/>`;
-    } else {
-      svg += `<rect x="${pos.x + 0.5}" y="${pos.y + 0.5}" width="6" height="6" fill="none" stroke="${acc}" stroke-width="1"/>`;
-      svg += `<rect x="${pos.x + 2}" y="${pos.y + 2}" width="3" height="3" fill="${acc}"/>`;
-    }
-  });
-
-  svg += `</svg>`;
-  return svg;
+  return `<svg viewBox="0 0 ${count} ${count}" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
+    <path d="${pathData}" fill="${acc}" />
+  </svg>`;
 }
+
 
 function renderCustomQR() {
   const box = document.getElementById('outQrBox');
@@ -411,6 +386,7 @@ function getContactPrefixCode(iconClass) {
   if (iconClass.includes('phone')) return 'T.';
   if (iconClass.includes('envelope')) return 'E.';
   if (iconClass.includes('globe')) return 'W.';
+  if (iconClass.includes('discord')) return 'DC.';
   if (iconClass.includes('instagram')) return 'IG.';
   if (iconClass.includes('soundcloud')) return 'SC.';
   if (iconClass.includes('youtube')) return 'YT.';
