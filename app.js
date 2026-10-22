@@ -523,9 +523,6 @@ function renderCardContent() {
     sContainer.appendChild(barBox);
   }
 
-  // 좌측 연락처 (심볼 단독 고정 + 선택적 마이크로 코드)
-  const cList = document.getElementById('outContactList');
-  cList.innerHTML = '';
   // 좌측 연락처 (심볼 단독 고정 + 기호 톤다운 디테일)
   const toneMode = document.getElementById('selContactTone')?.value || 'subtle';
   const cList = document.getElementById('outContactList');
@@ -673,7 +670,6 @@ function updateDecorations() {
         <i class="fa-solid fa-play" style="font-size:8px"></i>
         <i class="fa-solid fa-forward-step" style="font-size:8px"></i>
       </div>`;
-    }
     } else if (widget === 'wave') {
       const h = [4, 9, 13, 6, 11, 14, 7, 4, 10, 13, 5, 8, 14, 6, 4, 9, 11, 5, 12, 7, 4];
       wEl.innerHTML = `<div class="wave-bars">${h.map(v => `<span style="height:${v}px"></span>`).join('')}</div>`;
