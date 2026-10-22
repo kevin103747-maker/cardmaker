@@ -592,7 +592,7 @@ function updateDecorations() {
   const widget = document.getElementById('selMusicWidget')?.value || 'player';
   const stampText = document.getElementById('inTopStamp')?.value.trim() || '';
 
-  // 1) 중앙 세로선 & 다이아몬드 일체형 SVG 렌더링 (좌우 축 오차 0.00px 보장)
+  // 1) 중앙 세로선 & 다이아몬드 일체형 SVG 렌더링 (페이드아웃 + 좌우 축 0.00px 일치)
   const divLine = document.getElementById('outDividerLine');
   if (divLine) {
     divLine.className = 'back-divider-svg-host';
@@ -618,15 +618,33 @@ function updateDecorations() {
                 <polygon points="12,${207 - r*0.85} ${12 + r*0.85},207 12,${207 + r*0.85} ${12 - r*0.85},207" fill="var(--accent)" />`;
     }
 
+    // 페이드아웃(fade-dia) 선택 시 상하단 투명해지는 SVG 마스크 적용
+    const lineStrokeAttr = (diaType === 'fade-dia')
+      ? `stroke="var(--accent)" mask="url(#divFadeMask)"`
+      : `stroke="var(--accent)" opacity="0.78"`;
+
     divLine.innerHTML = `
       <svg width="24" height="100%" viewBox="0 0 24 400" preserveAspectRatio="none" style="position:absolute;top:0;left:50%;transform:translateX(-50%);height:100%;width:24px;overflow:visible;">
-        <line x1="12" y1="0" x2="12" y2="400" stroke="var(--accent)" stroke-width="var(--divider-width, 1.2px)" opacity="0.78" />
+        <defs>
+          <linearGradient id="divFadeGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="white" stop-opacity="0" />
+            <stop offset="18%" stop-color="white" stop-opacity="0.82" />
+            <stop offset="50%" stop-color="white" stop-opacity="0.95" />
+            <stop offset="82%" stop-color="white" stop-opacity="0.82" />
+            <stop offset="100%" stop-color="white" stop-opacity="0" />
+          </linearGradient>
+          <mask id="divFadeMask">
+            <rect x="0" y="0" width="24" height="400" fill="url(#divFadeGrad)" />
+          </mask>
+        </defs>
+        <line x1="12" y1="0" x2="12" y2="400" ${lineStrokeAttr} stroke-width="var(--divider-width, 1.2px)" />
       </svg>
       <svg width="24" height="400" viewBox="0 0 24 400" style="position:relative;width:24px;height:100%;overflow:visible;z-index:2;">
         ${gemSvg}
       </svg>
     `;
   }
+
 
   // 2) 이름 하단 포인트 룰
   const ruleEl = document.getElementById('outNameRule');
