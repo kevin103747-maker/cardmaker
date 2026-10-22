@@ -592,58 +592,58 @@ function updateDecorations() {
   const widget = document.getElementById('selMusicWidget')?.value || 'player';
   const stampText = document.getElementById('inTopStamp')?.value.trim() || '';
 
-  // 1) 중앙 세로선 & 다이아몬드 일체형 SVG 렌더링 (페이드아웃 + 좌우 축 0.00px 일치)
+  // 1) 중앙 세로선 & 다이아몬드 일체형 SVG 렌더링 (미리보기 & PDF 100% 호환 페이드아웃)
   const divLine = document.getElementById('outDividerLine');
   if (divLine) {
     divLine.className = 'back-divider-svg-host';
     const dSz = parseFloat(diaSz) || 8;
     const r = dSz * 0.72; // 마름모 반지름 (정중앙 x=12 기준 완벽 대칭)
-    let gemSvg = '';
+    const lineW = parseFloat(document.getElementById('rDivW')?.value) || 1.2;
+    const accColor = document.getElementById('cAcc')?.value || '#223E33';
+    const bgColor = document.getElementById('cBg')?.value || '#F1FBF5';
 
+    let gemSvg = '';
     if (diaType === 'solid' || diaType === 'fade-dia') {
-      gemSvg = `<rect x="0" y="${200 - r - 6}" width="24" height="${(r + 6) * 2}" fill="var(--card-bg)" />
-                <polygon points="12,${200 - r} ${12 + r},200 12,${200 + r} ${12 - r},200" fill="var(--accent)" />`;
+      gemSvg = `<rect x="0" y="${200 - r - 6}" width="24" height="${(r + 6) * 2}" fill="${bgColor}" />
+                <polygon points="12,${200 - r} ${12 + r},200 12,${200 + r} ${12 - r},200" fill="${accColor}" />`;
     } else if (diaType === 'hollow') {
-      gemSvg = `<rect x="0" y="${200 - r - 6}" width="24" height="${(r + 6) * 2}" fill="var(--card-bg)" />
-                <polygon points="12,${200 - r} ${12 + r},200 12,${200 + r} ${12 - r},200" fill="var(--card-bg)" stroke="var(--accent)" stroke-width="1.3" />`;
+      gemSvg = `<rect x="0" y="${200 - r - 6}" width="24" height="${(r + 6) * 2}" fill="${bgColor}" />
+                <polygon points="12,${200 - r} ${12 + r},200 12,${200 + r} ${12 - r},200" fill="${bgColor}" stroke="${accColor}" stroke-width="1.3" />`;
     } else if (diaType === 'triple') {
       const sr = r * 0.58;
-      gemSvg = `<rect x="0" y="${200 - r - 18}" width="24" height="${(r + 18) * 2}" fill="var(--card-bg)" />
-                <polygon points="12,${186 - sr} ${12 + sr},186 12,${186 + sr} ${12 - sr},186" fill="var(--accent)" opacity="0.55" />
-                <polygon points="12,${200 - r} ${12 + r},200 12,${200 + r} ${12 - r},200" fill="var(--accent)" />
-                <polygon points="12,${214 - sr} ${12 + sr},214 12,${214 + sr} ${12 - sr},214" fill="var(--accent)" opacity="0.55" />`;
+      gemSvg = `<rect x="0" y="${200 - r - 18}" width="24" height="${(r + 18) * 2}" fill="${bgColor}" />
+                <polygon points="12,${186 - sr} ${12 + sr},186 12,${186 + sr} ${12 - sr},186" fill="${accColor}" opacity="0.55" />
+                <polygon points="12,${200 - r} ${12 + r},200 12,${200 + r} ${12 - r},200" fill="${accColor}" />
+                <polygon points="12,${214 - sr} ${12 + sr},214 12,${214 + sr} ${12 - sr},214" fill="${accColor}" opacity="0.55" />`;
     } else if (diaType === 'double-gem') {
-      gemSvg = `<rect x="0" y="${200 - r - 12}" width="24" height="${(r + 12) * 2}" fill="var(--card-bg)" />
-                <polygon points="12,${193 - r*0.85} ${12 + r*0.85},193 12,${193 + r*0.85} ${12 - r*0.85},193" fill="var(--accent)" />
-                <polygon points="12,${207 - r*0.85} ${12 + r*0.85},207 12,${207 + r*0.85} ${12 - r*0.85},207" fill="var(--accent)" />`;
+      gemSvg = `<rect x="0" y="${200 - r - 12}" width="24" height="${(r + 12) * 2}" fill="${bgColor}" />
+                <polygon points="12,${193 - r*0.85} ${12 + r*0.85},193 12,${193 + r*0.85} ${12 - r*0.85},193" fill="${accColor}" />
+                <polygon points="12,${207 - r*0.85} ${12 + r*0.85},207 12,${207 + r*0.85} ${12 - r*0.85},207" fill="${accColor}" />`;
     }
 
-    // 페이드아웃(fade-dia) 선택 시 상하단 투명해지는 SVG 마스크 적용
-    const lineStrokeAttr = (diaType === 'fade-dia')
-      ? `stroke="var(--accent)" mask="url(#divFadeMask)"`
-      : `stroke="var(--accent)" opacity="0.78"`;
+    // <line> 대신 <rect>에 직접 linearGradient를 채워 미리보기 & PDF 캡처 완벽 호환
+    const lineFill = (diaType === 'fade-dia') ? 'url(#divDirectFade)' : accColor;
+    const lineOpacity = (diaType === 'fade-dia') ? '1' : '0.75';
 
     divLine.innerHTML = `
       <svg width="24" height="100%" viewBox="0 0 24 400" preserveAspectRatio="none" style="position:absolute;top:0;left:50%;transform:translateX(-50%);height:100%;width:24px;overflow:visible;">
         <defs>
-          <linearGradient id="divFadeGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="white" stop-opacity="0" />
-            <stop offset="18%" stop-color="white" stop-opacity="0.82" />
-            <stop offset="50%" stop-color="white" stop-opacity="0.95" />
-            <stop offset="82%" stop-color="white" stop-opacity="0.82" />
-            <stop offset="100%" stop-color="white" stop-opacity="0" />
+          <linearGradient id="divDirectFade" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="${accColor}" stop-opacity="0" />
+            <stop offset="20%" stop-color="${accColor}" stop-opacity="0.7" />
+            <stop offset="50%" stop-color="${accColor}" stop-opacity="0.9" />
+            <stop offset="80%" stop-color="${accColor}" stop-opacity="0.7" />
+            <stop offset="100%" stop-color="${accColor}" stop-opacity="0" />
           </linearGradient>
-          <mask id="divFadeMask">
-            <rect x="0" y="0" width="24" height="400" fill="url(#divFadeGrad)" />
-          </mask>
         </defs>
-        <line x1="12" y1="0" x2="12" y2="400" ${lineStrokeAttr} stroke-width="var(--divider-width, 1.2px)" />
+        <rect x="${12 - lineW / 2}" y="0" width="${lineW}" height="400" fill="${lineFill}" opacity="${lineOpacity}" />
       </svg>
       <svg width="24" height="400" viewBox="0 0 24 400" style="position:relative;width:24px;height:100%;overflow:visible;z-index:2;">
         ${gemSvg}
       </svg>
     `;
   }
+
 
 
   // 2) 이름 하단 포인트 룰
