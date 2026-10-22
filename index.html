@@ -103,56 +103,80 @@
         </div>
       </div>
 
-      <!-- 3. 세로선 및 여백 · 비례 세부 조절 (개별 리셋 & 중앙맞춤 추가) -->
+      <!-- 3. 세로선 및 여백 · 비율 세부조절 (중앙맞춤 & 초기화 탑재) -->
       <div class="panel-box">
         <div class="panel-title">
-          <span>3. 세로선 · 여백 · 레이아웃 조절</span>
+          <span>3. 여백 · 세로선 · 글자크기 조절</span>
           <div style="display:flex; gap:4px;">
-            <button class="btn-xs" onclick="centerAlignLayout()" title="좌우 50:50 정중앙 대칭 맞춤"><i class="fa-solid fa-align-center"></i> 50:50 중앙맞춤</button>
-            <button class="btn-xs" onclick="resetLayoutVars()" title="레이아웃 수치 전체 기본값"><i class="fa-solid fa-rotate-left"></i> 기본값</button>
+            <button class="btn-mini" onclick="centerAlignLayout()" title="좌우 대칭 50:50 및 세로선 100% 정렬">50:50 중앙맞춤</button>
+            <button class="btn-mini" onclick="resetLayoutVars()" title="시안 황금비율 기본값으로 복원">↺ 전체 초기화</button>
           </div>
+        </div>
+        <div style="font-size:10.5px; color:#9ca3af; margin-bottom:4px;">
+          💡 각 슬라이더 바를 <b>더블클릭</b>하거나 <b>↺ 아이콘</b>을 누르면 개별 초기화됩니다.
         </div>
         <div class="grid-2">
           <div>
             <label class="lbl"><span>상하 여백 (Y)</span><span><span class="val-badge" id="vPadY">50px</span> <i class="fa-solid fa-rotate-left sl-reset" onclick="resetSingleSlider('rPadY', 50)"></i></span></label>
-            <input type="range" id="rPadY" min="32" max="68" value="50" ondblclick="resetSingleSlider('rPadY', 50)" oninput="updateLayoutVars()">
+            <input type="range" id="rPadY" min="32" max="76" value="50" ondblclick="resetSingleSlider('rPadY', 50)" oninput="updateLayoutVars()">
           </div>
           <div>
             <label class="lbl"><span>좌우 여백 (X)</span><span><span class="val-badge" id="vPadX">56px</span> <i class="fa-solid fa-rotate-left sl-reset" onclick="resetSingleSlider('rPadX', 56)"></i></span></label>
-            <input type="range" id="rPadX" min="36" max="76" value="56" ondblclick="resetSingleSlider('rPadX', 56)" oninput="updateLayoutVars()">
+            <input type="range" id="rPadX" min="36" max="88" value="56" ondblclick="resetSingleSlider('rPadX', 56)" oninput="updateLayoutVars()">
+          </div>
+        </div>
+        <div class="grid-2">
+          <div>
+            <label class="lbl"><span>좌측 영역 비율</span><span><span class="val-badge" id="vLeftRatio">56%</span> <i class="fa-solid fa-rotate-left sl-reset" onclick="resetSingleSlider('rLeftRatio', 56)"></i></span></label>
+            <input type="range" id="rLeftRatio" min="44" max="66" value="56" ondblclick="resetSingleSlider('rLeftRatio', 56)" oninput="updateLayoutVars()">
           </div>
           <div>
-            <label class="lbl"><span>좌측 영역 폭 비율</span><span><span class="val-badge" id="vLeftRatio">56%</span> <i class="fa-solid fa-rotate-left sl-reset" onclick="resetSingleSlider('rLeftRatio', 50)" title="50% 중앙으로"></i></span></label>
-            <input type="range" id="rLeftRatio" min="40" max="66" value="56" ondblclick="resetSingleSlider('rLeftRatio', 50)" oninput="updateLayoutVars()">
+            <label class="lbl"><span>세로선 좌우간격</span><span><span class="val-badge" id="vDivGap">38px</span> <i class="fa-solid fa-rotate-left sl-reset" onclick="resetSingleSlider('rDivGap', 38)"></i></span></label>
+            <input type="range" id="rDivGap" min="18" max="64" value="38" ondblclick="resetSingleSlider('rDivGap', 38)" oninput="updateLayoutVars()">
           </div>
-          <div>
-            <label class="lbl"><span>세로선 좌우 간격</span><span><span class="val-badge" id="vDivGap">38px</span> <i class="fa-solid fa-rotate-left sl-reset" onclick="resetSingleSlider('rDivGap', 38)"></i></span></label>
-            <input type="range" id="rDivGap" min="20" max="56" value="38" ondblclick="resetSingleSlider('rDivGap', 38)" oninput="updateLayoutVars()">
-          </div>
+        </div>
+        <div class="grid-2">
           <div>
             <label class="lbl"><span>세로선 두께</span><span><span class="val-badge" id="vDivW">1.2px</span> <i class="fa-solid fa-rotate-left sl-reset" onclick="resetSingleSlider('rDivW', 1.2)"></i></span></label>
-            <input type="range" id="rDivW" min="0.5" max="3.0" step="0.1" value="1.2" ondblclick="resetSingleSlider('rDivW', 1.2)" oninput="updateLayoutVars()">
+            <input type="range" id="rDivW" min="0.5" max="3" step="0.1" value="1.2" ondblclick="resetSingleSlider('rDivW', 1.2)" oninput="updateLayoutVars()">
           </div>
           <div>
-            <label class="lbl"><span>세로선 길이 (높이)</span><span><span class="val-badge" id="vDivH">92%</span> <i class="fa-solid fa-rotate-left sl-reset" onclick="resetSingleSlider('rDivH', 92)"></i></span></label>
+            <label class="lbl"><span>세로선 길이</span><span><span class="val-badge" id="vDivH">92%</span> <i class="fa-solid fa-rotate-left sl-reset" onclick="resetSingleSlider('rDivH', 92)"></i></span></label>
             <input type="range" id="rDivH" min="50" max="100" value="92" ondblclick="resetSingleSlider('rDivH', 92)" oninput="updateLayoutVars()">
           </div>
         </div>
-        <div class="grid-3" style="margin-bottom:0;">
+        <div class="grid-2">
           <div>
-            <label class="lbl"><span>이름 크기</span><span><span class="val-badge" id="vNameSz">24px</span> <i class="fa-solid fa-rotate-left sl-reset" onclick="resetSingleSlider('rNameSz', 24)"></i></span></label>
-            <input type="range" id="rNameSz" min="18" max="32" value="24" ondblclick="resetSingleSlider('rNameSz', 24)" oninput="updateLayoutVars()">
+            <label class="lbl"><span>메인 예명 크기 (권장 26px)</span><span><span class="val-badge" id="vNameSz">26px</span> <i class="fa-solid fa-rotate-left sl-reset" onclick="resetSingleSlider('rNameSz', 26)"></i></span></label>
+            <input type="range" id="rNameSz" min="18" max="34" step="0.5" value="26" ondblclick="resetSingleSlider('rNameSz', 26)" oninput="updateLayoutVars()">
           </div>
           <div>
-            <label class="lbl"><span>이름 자간</span><span><span class="val-badge" id="vNameTrk">-0.5px</span> <i class="fa-solid fa-rotate-left sl-reset" onclick="resetSingleSlider('rNameTrk', -0.5)"></i></span></label>
-            <input type="range" id="rNameTrk" min="-2.0" max="3.0" step="0.1" value="-0.5" ondblclick="resetSingleSlider('rNameTrk', -0.5)" oninput="updateLayoutVars()">
+            <label class="lbl"><span>본명·부제 크기 (권장 13.5px)</span><span><span class="val-badge" id="vSubNameSz">13.5px</span> <i class="fa-solid fa-rotate-left sl-reset" onclick="resetSingleSlider('rSubNameSz', 13.5)"></i></span></label>
+            <input type="range" id="rSubNameSz" min="10" max="18" step="0.5" value="13.5" ondblclick="resetSingleSlider('rSubNameSz', 13.5)" oninput="updateLayoutVars()">
+          </div>
+        </div>
+        <div class="grid-2">
+          <div>
+            <label class="lbl"><span>연락처 글자 크기 (권장 13px)</span><span><span class="val-badge" id="vConSz">13px</span> <i class="fa-solid fa-rotate-left sl-reset" onclick="resetSingleSlider('rConSz', 13)"></i></span></label>
+            <input type="range" id="rConSz" min="10" max="16" step="0.5" value="13" ondblclick="resetSingleSlider('rConSz', 13)" oninput="updateLayoutVars()">
           </div>
           <div>
-            <label class="lbl"><span>연락처 간격</span><span><span class="val-badge" id="vConGap">11px</span> <i class="fa-solid fa-rotate-left sl-reset" onclick="resetSingleSlider('rConGap', 11)"></i></span></label>
-            <input type="range" id="rConGap" min="6" max="18" value="11" ondblclick="resetSingleSlider('rConGap', 11)" oninput="updateLayoutVars()">
+            <label class="lbl"><span>연락처 줄 간격</span><span><span class="val-badge" id="vConGap">11px</span> <i class="fa-solid fa-rotate-left sl-reset" onclick="resetSingleSlider('rConGap', 11)"></i></span></label>
+            <input type="range" id="rConGap" min="6" max="20" value="11" ondblclick="resetSingleSlider('rConGap', 11)" oninput="updateLayoutVars()">
+          </div>
+        </div>
+        <div class="grid-2">
+          <div>
+            <label class="lbl"><span>스탬프·캡션 크기 (권장 10px)</span><span><span class="val-badge" id="vMicroSz">10px</span> <i class="fa-solid fa-rotate-left sl-reset" onclick="resetSingleSlider('rMicroSz', 10)"></i></span></label>
+            <input type="range" id="rMicroSz" min="8" max="13" step="0.5" value="10" ondblclick="resetSingleSlider('rMicroSz', 10)" oninput="updateLayoutVars()">
+          </div>
+          <div>
+            <label class="lbl"><span>예명 자간</span><span><span class="val-badge" id="vNameTrk">-0.5px</span> <i class="fa-solid fa-rotate-left sl-reset" onclick="resetSingleSlider('rNameTrk', -0.5)"></i></span></label>
+            <input type="range" id="rNameTrk" min="-2.5" max="4" step="0.1" value="-0.5" ondblclick="resetSingleSlider('rNameTrk', -0.5)" oninput="updateLayoutVars()">
           </div>
         </div>
       </div>
+
 
       <!-- 4. 영문예명 · 한글예명 · 본명 및 제공 서비스 -->
       <div class="panel-box">

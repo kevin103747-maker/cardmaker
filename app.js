@@ -116,44 +116,35 @@ function onColorInput() {
 }
 
 function updateLayoutVars() {
-  const padY = document.getElementById('rPadY').value;
-  const padX = document.getElementById('rPadX').value;
-  const leftRatio = document.getElementById('rLeftRatio').value;
-  const divGap = document.getElementById('rDivGap').value;
-  const divW = document.getElementById('rDivW').value;
-  const divH = document.getElementById('rDivH').value;
-  const nameSz = document.getElementById('rNameSz').value;
-  const nameTrk = document.getElementById('rNameTrk').value;
-  const conGap = document.getElementById('rConGap').value;
-  const qrSz = document.getElementById('rQrSz').value;
-  const font = document.getElementById('selFont').value;
+  const map = [
+    ['rPadY', 'vPadY', '--pad-y', 'px'],
+    ['rPadX', 'vPadX', '--pad-x', 'px'],
+    ['rLeftRatio', 'vLeftRatio', '--left-col-ratio', '%'],
+    ['rDivGap', 'vDivGap', '--divider-gap', 'px'],
+    ['rDivW', 'vDivW', '--divider-w', 'px'],
+    ['rDivH', 'vDivH', '--divider-h', '%'],
+    ['rNameSz', 'vNameSz', '--name-size', 'px'],
+    ['rSubNameSz', 'vSubNameSz', '--sub-name-size', 'px'],
+    ['rConSz', 'vConSz', '--con-font-size', 'px'],
+    ['rMicroSz', 'vMicroSz', '--micro-font-size', 'px'],
+    ['rNameTrk', 'vNameTrk', '--name-track', 'px'],
+    ['rConGap', 'vConGap', '--contact-gap', 'px'],
+    ['rQrSz', 'vQrSz', '--qr-size', 'px']
+  ];
+  const root = document.documentElement;
+  map.forEach(([inId, valId, cssVar, unit]) => {
+    const el = document.getElementById(inId);
+    if (!el) return;
+    const val = el.value;
+    const badge = document.getElementById(valId);
+    if (badge) badge.textContent = val + unit;
+    root.style.setProperty(cssVar, val + unit);
+  });
 
-  document.getElementById('vPadY').textContent = padY + 'px';
-  document.getElementById('vPadX').textContent = padX + 'px';
-  document.getElementById('vLeftRatio').textContent = leftRatio + '%';
-  document.getElementById('vDivGap').textContent = divGap + 'px';
-  document.getElementById('vDivW').textContent = divW + 'px';
-  document.getElementById('vDivH').textContent = divH + '%';
-  document.getElementById('vNameSz').textContent = nameSz + 'px';
-  document.getElementById('vNameTrk').textContent = nameTrk + 'px';
-  document.getElementById('vConGap').textContent = conGap + 'px';
-  document.getElementById('vQrSz').textContent = qrSz + 'px';
-
-  const r = document.documentElement;
-  r.style.setProperty('--pad-y', padY + 'px');
-  r.style.setProperty('--pad-x', padX + 'px');
-  r.style.setProperty('--left-ratio', leftRatio + '%');
-  r.style.setProperty('--divider-gap', divGap + 'px');
-  r.style.setProperty('--divider-width', divW + 'px');
-  r.style.setProperty('--divider-height', divH + '%');
-  r.style.setProperty('--name-size', nameSz + 'px');
-  r.style.setProperty('--name-tracking', nameTrk + 'px');
-  r.style.setProperty('--contact-gap', conGap + 'px');
-  r.style.setProperty('--qr-size', qrSz + 'px');
-  r.style.setProperty('--font-family', font);
-
+  renderCustomQR();
   saveStateToLocal();
 }
+
 
 // 4. 드래그 앤 드롭 컨트롤 리스트
 function renderContactSortable() {
@@ -957,96 +948,75 @@ function exportRasterPNG(targetId, label) {
   });
 }
 
+
+// 초고해상도 PNG DataURL을 인쇄소 입고용 무손실급 JPEG(품질 98%)로 변환 (45MB -> 1MB 다이어트)
+function compressDataUrlToHighResJpeg(pngDataUrl, bgColor = '#ffffff') {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      const cvs = document.createElement('canvas');
+      cvs.width = img.width;
+      cvs.height = img.height;
+      const ctx = cvs.getContext('2d');
+      ctx.fillStyle = bgColor;
+      ctx.fillRect(0, 0, cvs.width, cvs.height);
+      ctx.drawImage(img, 0, 0);
+      resolve(cvs.toDataURL('image/jpeg', 0.98));
+    };
+    img.src = pngDataUrl;
+  });
+}
+
+// 인쇄소 입고용 양면 PDF 저장 (용량 최적화 & 400 DPI급 유지)
 function exportPrintPDF() {
-  const bleedPx = parseFloat(document.getElementById('selBleed')?.value || 16.8);
-  const bleedMm = bleedPx / 8.4;
-  const wMm = 90 + (bleedMm * 2);
-  const hMm = 50 + (bleedMm * 2);
-
-  const frontEl = document.getElementById('card-front-wrap');
-  const backEl = document.getElementById('card-back-wrap');
-  const prevFront = frontEl.style.display;
-  const prevBack = backEl.style.display;
-
-  frontEl.style.display = 'block';
-  backEl.style.display = 'block';
-
   prepareForCleanCapture(async (restore) => {
+    const frontEl = document.getElementById('card-front-wrap');
+    const backEl = document.getElementById('card-back-wrap');
+    const origFrontDisp = frontEl.style.display;
+    const origBackDisp = backEl.style.display;
+
+    frontEl.style.display = 'block';
+    backEl.style.display = 'block';
+
     try {
+      const bleedPx = parseFloat(document.getElementById('selBleed')?.value || 16.8);
+      const bleedMm = bleedPx / 8.4;
+      const wMm = 90 + (bleedMm * 2);
+      const hMm = 50 + (bleedMm * 2);
+
       const { jsPDF } = window.jspdf;
       const pdf = new jsPDF({
         orientation: 'landscape',
         unit: 'mm',
-        format: [wMm, hMm]
+        format: [wMm, hMm],
+        compress: true
       });
 
-      // 1페이지: 앞면
-      const frontDataUrl = await captureCardToDataUrl(frontEl, 4);
-      pdf.addImage(frontDataUrl, 'PNG', 0, 0, wMm, hMm, undefined, 'FAST');
+      // 1페이지: 앞면 캡처 후 고밀도 JPEG 압축 삽입
+      const frontPng = await captureCardToDataUrl(frontEl, 4);
+      const fBg = getComputedStyle(document.documentElement).getPropertyValue('--f-card-bg').trim() || '#223E33';
+      const frontJpeg = await compressDataUrlToHighResJpeg(frontPng, fBg);
+      pdf.addImage(frontJpeg, 'JPEG', 0, 0, wMm, hMm, undefined, 'FAST');
 
-      // 2페이지: 뒷면
+      // 2페이지: 뒷면 캡처 후 고밀도 JPEG 압축 삽입
       pdf.addPage([wMm, hMm], 'landscape');
-      const backDataUrl = await captureCardToDataUrl(backEl, 4);
-      pdf.addImage(backDataUrl, 'PNG', 0, 0, wMm, hMm, undefined, 'FAST');
+      const backPng = await captureCardToDataUrl(backEl, 4);
+      const bBg = document.getElementById('cBg')?.value || '#F1FBF5';
+      const backJpeg = await compressDataUrlToHighResJpeg(backPng, bBg);
+      pdf.addImage(backJpeg, 'JPEG', 0, 0, wMm, hMm, undefined, 'FAST');
 
       const name = document.getElementById('inStage')?.value.trim() || 'Card';
       pdf.save(`${name}_인쇄소입고용_양면명함(${wMm}x${hMm}mm).pdf`);
     } catch (err) {
-      console.error('PDF 생성 오류:', err);
       alert('PDF 생성 중 오류가 발생했습니다: ' + err.message);
     } finally {
-      frontEl.style.display = prevFront;
-      backEl.style.display = prevBack;
+      frontEl.style.display = origFrontDisp;
+      backEl.style.display = origBackDisp;
       restore();
     }
   });
 }
 
-
-function exportPrintPDF() {
-  const bleedPx = parseFloat(document.getElementById('selBleed')?.value || 16.8);
-  const bleedMm = bleedPx / 8.4;
-  const wMm = 90 + (bleedMm * 2);
-  const hMm = 50 + (bleedMm * 2);
-
-  const frontEl = document.getElementById('card-front-wrap');
-  const backEl = document.getElementById('card-back-wrap');
-  const prevFront = frontEl.style.display;
-  const prevBack = backEl.style.display;
-
-  frontEl.style.display = 'block';
-  backEl.style.display = 'block';
-
-  prepareForCleanCapture(async (restore) => {
-    try {
-      const { jsPDF } = window.jspdf;
-      const pdf = new jsPDF({
-        orientation: 'landscape',
-        unit: 'mm',
-        format: [wMm, hMm]
-      });
-
-      // 1페이지: 앞면
-      const frontDataUrl = await captureCardToDataUrl(frontEl, 4);
-      pdf.addImage(frontDataUrl, 'PNG', 0, 0, wMm, hMm);
-
-      // 2페이지: 뒷면
-      pdf.addPage([wMm, hMm], 'landscape');
-      const backDataUrl = await captureCardToDataUrl(backEl, 4);
-      pdf.addImage(backDataUrl, 'PNG', 0, 0, wMm, hMm);
-
-      const name = document.getElementById('inStage')?.value.trim() || 'Card';
-      pdf.save(`${name}_인쇄소입고용_양면명함(${wMm}x${hMm}mm).pdf`);
-    } catch (err) {
-      console.error('PDF 생성 오류:', err);
-      alert('PDF 생성 중 오류가 발생했습니다: ' + err.message);
-    } finally {
-      frontEl.style.display = prevFront;
-      backEl.style.display = prevBack;
-      restore();
-    }
-  });
-}
 
 
 

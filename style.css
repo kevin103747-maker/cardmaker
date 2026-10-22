@@ -1363,3 +1363,33 @@ input[type="range"] {
   margin: 0 3px;
   vertical-align: middle;
 }
+/* ================= 실물 인쇄 가독성 폰트 크기 연동 ================= */
+:root {
+  --sub-name-size: 13.5px;
+  --con-font-size: 13px;
+  --micro-font-size: 10px;
+}
+
+.back-stage-kr {
+  font-size: var(--sub-name-size) !important;
+}
+
+.back-real-name-tag {
+  font-size: calc(var(--sub-name-size) - 0.5px) !important;
+}
+
+.c-text,
+.social-handle {
+  font-size: var(--con-font-size) !important;
+}
+
+.c-prefix {
+  font-size: calc(var(--con-font-size) - 2.5px) !important;
+}
+
+.decor-top-stamp,
+.qr-caption-tag,
+.micro-label,
+.player-time {
+  font-size: var(--micro-font-size) !important;
+}
