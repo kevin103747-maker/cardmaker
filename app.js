@@ -119,15 +119,15 @@ function updateLayoutVars() {
   const map = [
     ['rPadY', 'vPadY', '--pad-y', 'px'],
     ['rPadX', 'vPadX', '--pad-x', 'px'],
-    ['rLeftRatio', 'vLeftRatio', '--left-ratio', '%'],
+    ['rLeftRatio', 'vLeftRatio', '--left-col-ratio', '%'],
     ['rDivGap', 'vDivGap', '--divider-gap', 'px'],
-    ['rDivW', 'vDivW', '--divider-width', 'px'],
-    ['rDivH', 'vDivH', '--divider-height', '%'],
+    ['rDivW', 'vDivW', '--divider-w', 'px'],
+    ['rDivH', 'vDivH', '--divider-h', '%'],
     ['rNameSz', 'vNameSz', '--name-size', 'px'],
     ['rSubNameSz', 'vSubNameSz', '--sub-name-size', 'px'],
     ['rConSz', 'vConSz', '--con-font-size', 'px'],
     ['rMicroSz', 'vMicroSz', '--micro-font-size', 'px'],
-    ['rNameTrk', 'vNameTrk', '--name-tracking', 'px'],
+    ['rNameTrk', 'vNameTrk', '--name-track', 'px'],
     ['rConGap', 'vConGap', '--contact-gap', 'px'],
     ['rQrSz', 'vQrSz', '--qr-size', 'px']
   ];

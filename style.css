@@ -1436,3 +1436,49 @@ input[type="range"] {
   margin: 0 !important;
   flex-shrink: 0 !important;
 }
+
+/* ================= 앞면(Front) 상단 캡션 & 타이포 세부조절 연동 ================= */
+:root {
+  --f-logo-y: 0px;
+  --f-main-size: 20px;
+  --f-main-track: 1.5px;
+  --f-sub-size: 9.5px;
+  --f-sub-track: 2.5px;
+}
+
+.front-top-caption {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 3.2px;
+  color: var(--text-sub);
+  opacity: 0.72;
+  text-transform: uppercase;
+  text-align: center;
+  line-height: 1;
+}
+
+.f-layout-original-line .front-top-caption {
+  text-align: left;
+}
+
+.front-logo-area {
+  transform: translateY(var(--f-logo-y, 0px)) !important;
+}
+
+.front-stage-name {
+  font-size: var(--f-main-size, 20px) !important;
+  letter-spacing: var(--f-main-track, 1.5px) !important;
+}
+
+.front-role-title {
+  font-size: var(--f-sub-size, 9.5px) !important;
+  letter-spacing: var(--f-sub-track, 2.5px) !important;
+}
+
+.front-line-gem .true-diamond {
+  width: 5px !important;
+  height: 5px !important;
+  background-color: var(--accent) !important;
+  transform: rotate(45deg) !important;
+  display: block !important;
+}

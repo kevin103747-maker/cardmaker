@@ -432,55 +432,55 @@ Vocal Directing, Mixing & Mastering</textarea>
         </div>
       </div>
 
-      <!-- 8. [신규] 앞면(Front) 전용: 내 로고 & 부가정보 설정 -->
+      <!-- 8. 앞면(Front) 전용: 내 로고 & 부가정보 마스터 설정 -->
       <div class="panel-box">
         <div class="panel-title">
-          <span>8. 앞면 (Front) — 내 로고 & 부가정보</span>
-          <button class="btn-xs" onclick="switchView('flat-front')"><i class="fa-solid fa-eye"></i> 앞면 보기</button>
+          <span>8. 앞면(Front): 로고 · 캡션 · 타이포 설정</span>
+          <button class="btn-mini" onclick="switchView('flat-front')">앞면 크게보기</button>
         </div>
 
-        <!-- 앞면 전용 독립 색상 모드 & 컬러 피커 -->
         <div class="field-row">
-          <label class="lbl">앞면 색상 테마 모드</label>
+          <label class="lbl">앞면 색상 모드 (듀플렉스 컬러 연출)</label>
           <select id="selFrontColorMode" class="inp" onchange="updateFrontCard()">
-            <option value="custom" selected>앞면 색상 개별 지정 (아래 컬러피커 사용)</option>
-            <option value="invert">뒷면과 반전 대비 (다크 앞면 ↔ 라이트 뒷면)</option>
-            <option value="sync">뒷면 색상과 100% 동일하게 동기화</option>
+            <option value="custom" selected>🎨 앞면 색상 개별 지정 (Custom)</option>
+            <option value="invert">🌗 뒷면과 색상 자동 반전 (Invert)</option>
+            <option value="sync">🔗 뒷면과 동일한 색상 사용 (Sync)</option>
           </select>
         </div>
-        <div class="grid-2" id="frontColorPickersWrap">
-          <div>
-            <label class="lbl">앞면 배경색</label>
-            <div class="color-pick"><input type="color" id="cFBg" value="#141517" oninput="updateFrontCard()"><span id="hFBg">#141517</span></div>
+
+        <div class="picker-row" id="frontColorPickersWrap" style="margin-bottom:12px;">
+          <div class="color-item">
+            <span class="lbl" style="margin:0">앞면 배경</span>
+            <div class="color-well"><input type="color" id="cFBg" value="#223E33" oninput="updateFrontCard()"><span class="hex-code" id="hFBg">#223E33</span></div>
           </div>
-          <div>
-            <label class="lbl">앞면 메인 폰트색</label>
-            <div class="color-pick"><input type="color" id="cFMain" value="#f3f4f6" oninput="updateFrontCard()"><span id="hFMain">#F3F4F6</span></div>
+          <div class="color-item">
+            <span class="lbl" style="margin:0">앞면 메인글씨</span>
+            <div class="color-well"><input type="color" id="cFMain" value="#F1FBF5" oninput="updateFrontCard()"><span class="hex-code" id="hFMain">#F1FBF5</span></div>
           </div>
-          <div>
-            <label class="lbl">앞면 부가정보 폰트색</label>
-            <div class="color-pick"><input type="color" id="cFSub" value="#9ca3af" oninput="updateFrontCard()"><span id="hFSub">#9CA3AF</span></div>
+          <div class="color-item">
+            <span class="lbl" style="margin:0">앞면 서브글씨</span>
+            <div class="color-well"><input type="color" id="cFSub" value="#8FAEA0" oninput="updateFrontCard()"><span class="hex-code" id="hFSub">#8FAEA0</span></div>
           </div>
-          <div>
-            <label class="lbl">앞면 로고·라인 포인트색</label>
-            <div class="color-pick"><input type="color" id="cFAcc" value="#e5e7eb" oninput="updateFrontCard()"><span id="hFAcc">#E5E7EB</span></div>
+          <div class="color-item">
+            <span class="lbl" style="margin:0">앞면 포인트/선</span>
+            <div class="color-well"><input type="color" id="cFAcc" value="#F1FBF5" oninput="updateFrontCard()"><span class="hex-code" id="hFAcc">#F1FBF5</span></div>
           </div>
         </div>
 
         <div class="grid-2">
           <div>
-            <label class="lbl">앞면 로고 표시 방식</label>
+            <label class="lbl">정면 로고/심볼 표시 방식</label>
             <select id="selFrontLogoMode" class="inp" onchange="updateFrontCard()">
               <option value="upload">내 로고 이미지 업로드</option>
-              <option value="monogram" selected>타이포 모노그램 (자동)</option>
-              <option value="symbol">미니멀 심볼 (◆ / ♫)</option>
+              <option value="monogram" selected>이니셜 모노그램 엠블럼</option>
+              <option value="symbol">미니멀 사운드 심볼 (◆/♫)</option>
               <option value="none">로고 없음 (텍스트만)</option>
             </select>
           </div>
           <div>
-            <label class="lbl">로고 이미지 파일 선택</label>
+            <label class="lbl">내 로고 파일 선택 (PNG/SVG)</label>
             <button class="btn-xs" style="width:100%; height:31px; justify-content:center;" onclick="document.getElementById('frontLogoInput').click()">
-              <i class="fa-solid fa-upload"></i> 로고 파일 불러오기 (PNG/SVG)
+              <i class="fa-solid fa-cloud-arrow-up"></i> 로고 이미지 불러오기
             </button>
             <input type="file" id="frontLogoInput" accept="image/*" style="display:none" onchange="handleLogoUpload(event)">
           </div>
@@ -488,119 +488,139 @@ Vocal Directing, Mixing & Mastering</textarea>
 
         <div class="grid-2">
           <div>
-            <label class="lbl"><span>로고 크기</span><span><span class="val-badge" id="vFLogoSz">64px</span> <i class="fa-solid fa-rotate-left sl-reset" onclick="resetSingleFront('rFLogoSz', 64)"></i></span></label>
-            <input type="range" id="rFLogoSz" min="24" max="180" value="64" ondblclick="resetSingleFront('rFLogoSz', 64)" oninput="updateFrontCard()">
+            <label class="lbl"><span>로고 크기 (권장 54~95px)</span><span><span class="val-badge" id="vFLogoSz">64px</span> <i class="fa-solid fa-rotate-left sl-reset" onclick="resetSingleSlider('rFLogoSz', 64); updateFrontCard();"></i></span></label>
+            <input type="range" id="rFLogoSz" min="24" max="200" value="64" ondblclick="resetSingleSlider('rFLogoSz', 64); updateFrontCard();" oninput="updateFrontCard()">
           </div>
           <div>
-            <label class="lbl">업로드 로고 색상 보정</label>
-            <select id="selLogoFilter" class="inp" onchange="updateFrontCard()">
-              <option value="none" selected>원본 색상 그대로</option>
-              <option value="invert">색상 반전 (어두운 배경용 화이트화)</option>
-              <option value="grayscale">흑백 모노톤 변환</option>
-            </select>
+            <label class="lbl"><span>로고 상하 위치 (Y축)</span><span><span class="val-badge" id="vFLogoY">0px</span> <i class="fa-solid fa-rotate-left sl-reset" onclick="resetSingleSlider('rFLogoY', 0); updateFrontCard();"></i></span></label>
+            <input type="range" id="rFLogoY" min="-45" max="45" step="1" value="0" ondblclick="resetSingleSlider('rFLogoY', 0); updateFrontCard();" oninput="updateFrontCard()">
           </div>
         </div>
 
         <div class="grid-2">
           <div>
-            <label class="lbl">앞면 배치 구도</label>
+            <label class="lbl">앞면 전체 구도</label>
             <select id="selFrontLayout" class="inp" onchange="updateFrontCard()">
-              <option value="center-logo" selected>1. 정중앙 로고 + 하단 부가정보</option>
-              <option value="original-line">2. 시안 스타일 (좌하단 정렬 + 라인)</option>
-              <option value="Pure-center">3. 정중앙 로고 + 바로 아래 텍스트</option>
+              <option value="center-logo" selected>센터 로고 + 상·하단 밸런스 (추천)</option>
+              <option value="original-line">시안 오리지널 (좌측 정렬 + 하단 라인)</option>
+              <option value="pure-center">정중앙 올인원 밀착형</option>
             </select>
           </div>
           <div>
-            <label class="lbl">하단 포인트 라인</label>
-            <select id="selFrontLine" class="inp" onchange="updateFrontCard()">
-              <option value="dia-center" selected>중앙 다이아몬드 라인 (── ◆ ──)</option>
-              <option value="dia-end">끝단 다이아몬드 라인 (──── ◆)</option>
-              <option value="short">모던 숏 바 (36px)</option>
-              <option value="full">시안 기본 전체 직선</option>
-              <option value="none">라인 없음</option>
+            <label class="lbl">업로드 로고 색상 보정</label>
+            <select id="selLogoFilter" class="inp" onchange="updateFrontCard()">
+              <option value="none" selected>원본 색상 그대로</option>
+              <option value="invert">화이트/반전 (어두운 배경용)</option>
+              <option value="grayscale">흑백 모노톤</option>
             </select>
           </div>
         </div>
 
-        <div class="grid-2" style="margin-bottom:0;">
+        <div class="field-row">
+          <label class="lbl">앞면 상단 마이크로 헤더 (비워두면 숨김)</label>
+          <input type="text" id="inFrontTopCap" class="inp" value="ORIGINAL SOUND // SEOUL" placeholder="예: EST. 2026 · SEOUL 또는 ORIGINAL SOUND" oninput="updateFrontCard()">
+        </div>
+
+        <div class="grid-2">
           <div>
-            <label class="lbl">앞면 메인 문구 (비워두면 예명 자동)</label>
-            <input type="text" id="inFrontMainText" class="inp" value="AIDEN KIM" placeholder="예: 스튜디오명 또는 예명" oninput="updateFrontCard()">
+            <label class="lbl">앞면 메인 텍스트 (비워두면 숨김)</label>
+            <input type="text" id="inFrontMainText" class="inp" value="HamRanè" placeholder="예: HamRanè" oninput="updateFrontCard()">
           </div>
           <div>
-            <label class="lbl">앞면 부가 정보 (직함 / 슬로건 한 줄)</label>
-            <input type="text" id="inFrontSubText" class="inp" value="MUSIC PRODUCER & COMPOSER" placeholder="비워두면 숨김" oninput="updateFrontCard()">
+            <label class="lbl">앞면 서브 텍스트 (직함/슬로건)</label>
+            <input type="text" id="inFrontSubText" class="inp" value="MUSIC PRODUCER & COMPOSER" placeholder="예: MUSIC PRODUCER" oninput="updateFrontCard()">
           </div>
+        </div>
+
+        <div class="grid-2">
+          <div>
+            <label class="lbl"><span>앞면 메인글씨 크기</span><span><span class="val-badge" id="vFMainSz">20px</span> <i class="fa-solid fa-rotate-left sl-reset" onclick="resetSingleSlider('rFMainSz', 20); updateFrontCard();"></i></span></label>
+            <input type="range" id="rFMainSz" min="13" max="36" step="0.5" value="20" ondblclick="resetSingleSlider('rFMainSz', 20); updateFrontCard();" oninput="updateFrontCard()">
+          </div>
+          <div>
+            <label class="lbl"><span>앞면 메인글씨 자간</span><span><span class="val-badge" id="vFMainTrk">1.5px</span> <i class="fa-solid fa-rotate-left sl-reset" onclick="resetSingleSlider('rFMainTrk', 1.5); updateFrontCard();"></i></span></label>
+            <input type="range" id="rFMainTrk" min="-2" max="10" step="0.5" value="1.5" ondblclick="resetSingleSlider('rFMainTrk', 1.5); updateFrontCard();" oninput="updateFrontCard()">
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div>
+            <label class="lbl"><span>앞면 서브글씨 크기</span><span><span class="val-badge" id="vFSubSz">9.5px</span> <i class="fa-solid fa-rotate-left sl-reset" onclick="resetSingleSlider('rFSubSz', 9.5); updateFrontCard();"></i></span></label>
+            <input type="range" id="rFSubSz" min="7.5" max="15" step="0.5" value="9.5" ondblclick="resetSingleSlider('rFSubSz', 9.5); updateFrontCard();" oninput="updateFrontCard()">
+          </div>
+          <div>
+            <label class="lbl"><span>앞면 서브글씨 자간</span><span><span class="val-badge" id="vFSubTrk">2.5px</span> <i class="fa-solid fa-rotate-left sl-reset" onclick="resetSingleSlider('rFSubTrk', 2.5); updateFrontCard();"></i></span></label>
+            <input type="range" id="rFSubTrk" min="0" max="8" step="0.5" value="2.5" ondblclick="resetSingleSlider('rFSubTrk', 2.5); updateFrontCard();" oninput="updateFrontCard()">
+          </div>
+        </div>
+
+        <div class="field-row">
+          <label class="lbl">하단 포인트 라인 스타일</label>
+          <select id="selFrontLine" class="inp" onchange="updateFrontCard()">
+            <option value="dia-center" selected>다이아몬드 센터 라인 (─── ◆ ───)</option>
+            <option value="short">모던 숏 액센트 바 (───)</option>
+            <option value="full">클래식 와이드 실선 (─────────)</option>
+            <option value="dia-end">다이아몬드 끝단 포인트 (────── ◆)</option>
+            <option value="none">라인 없음</option>
+          </select>
         </div>
       </div>
-
     </div>
 
-    <!-- 하단 출력 버튼 -->
-    <div class="sidebar-footer">
-      <div class="export-row" style="grid-template-columns: 1fr 1fr 1fr 1fr;">
-        <button class="btn-exp" onclick="exportRasterPNG('card-front-wrap', '앞면')">
-          <i class="fa-solid fa-image"></i> 앞면 PNG
-        </button>
-        <button class="btn-exp" onclick="exportRasterPNG('card-back-wrap', '뒷면')">
-          <i class="fa-solid fa-image"></i> 뒷면 PNG
-        </button>
-        <button class="btn-exp vec" onclick="exportPureVectorSVG()">
-          <i class="fa-solid fa-bezier-curve"></i> 벡터 SVG
-        </button>
-        <button class="btn-exp pdf" onclick="exportPrintPDF()">
-          <i class="fa-solid fa-file-pdf"></i> 양면 PDF
-        </button>
-      </div>
+    <!-- 하단 출력 버튼 (앞면/뒷면 개별 저장 지원) -->
+    <div class="sidebar-footer" style="grid-template-columns: repeat(4, 1fr);">
+      <button class="btn-export" onclick="exportRasterPNG('card-front-wrap', '앞면')">
+        <i class="fa-solid fa-image"></i> 앞면 PNG
+      </button>
+      <button class="btn-export" onclick="exportRasterPNG('card-back-wrap', '뒷면')">
+        <i class="fa-solid fa-image"></i> 뒷면 PNG
+      </button>
+      <button class="btn-export primary" onclick="exportPureVectorSVG()">
+        <i class="fa-solid fa-bezier-curve"></i> 벡터 SVG
+      </button>
+      <button class="btn-export accent" onclick="exportPrintPDF()">
+        <i class="fa-solid fa-file-pdf"></i> 양면 PDF
+      </button>
     </div>
   </aside>
 
-  <!-- ================= 우측 프리뷰 스테이지 ================= -->
+  <!-- ================= 우측 라이브 프리뷰 스테이지 ================= -->
   <main class="studio-stage">
-    <div class="stage-top-bar">
-      <div class="toolbar-group">
-        <button class="tab-btn" id="tabFlatFront" onclick="switchView('flat-front')">
-          <i class="fa-regular fa-credit-card"></i> 앞면 (로고 면)
-        </button>
-        <button class="tab-btn active" id="tabFlatBack" onclick="switchView('flat-back')">
-          <i class="fa-regular fa-id-card"></i> 뒷면 (정보 면)
-        </button>
-        <button class="tab-btn" id="tabFlatBoth" onclick="switchView('flat-both')">
-          <i class="fa-solid fa-layer-group"></i> 앞·뒷면 동시 보기
-        </button>
-        <button class="tab-btn" id="tabActualSize" onclick="toggleActualSize()" title="실제 인쇄될 손바닥 명함 크기로 축소해서 가독성 점검">
-          <i class="fa-solid fa-compress"></i> 1:1 실물 크기 체감
+    <div class="stage-topbar">
+      <div class="view-tabs">
+        <button class="view-tab" id="tabFlatFront" onclick="switchView('flat-front')">앞면 디자인 뷰 (Front)</button>
+        <button class="view-tab active" id="tabFlatBack" onclick="switchView('flat-back')">뒷면 디자인 뷰 (Back)</button>
+        <button class="view-tab" id="tabFlatBoth" onclick="switchView('flat-both')">앞·뒷면 동시 보기</button>
+        <button class="view-tab" id="tabMockup3D" onclick="switchView('mockup-3d')">3D 스튜디오 목업 뷰</button>
+        <button class="view-tab" id="tabActualSize" onclick="toggleActualSize()" style="border-left:1px solid #353841; margin-left:4px; padding-left:14px; color:#38bdf8;">
+          <i class="fa-solid fa-ruler-combined"></i> 1:1 실물 크기 체감
         </button>
       </div>
-      <div class="autosave-indicator" id="autoSaveBadge">
-        <i class="fa-solid fa-check"></i> 자동 저장됨
+      <div class="autosave-indicator" id="saveStatus">
+        <span class="dot"></span> 실시간 자동 저장됨 (LocalStorage)
       </div>
     </div>
 
-    <div class="stage-canvas-wrap show-guides" id="stageWrap">
+    <div class="stage-canvas-wrap view-flat-back" id="stageWrap">
 
-      <!-- [앞면 명함 컨테이너: 로고 + 심플 부가정보] -->
-      <div class="card-bleed-container" id="card-front-wrap" style="display:none;">
+      <!-- [앞면 명함 컨테이너: 상단 마이크로 헤더 + 로고 + 하단 부가정보] -->
+      <div class="card-bleed-container" id="card-front-wrap">
         <div class="print-guides-overlay">
-          <div class="guide-trim-line">
-            <div class="crop-mark crop-tl"></div>
-            <div class="crop-mark crop-tr"></div>
-            <div class="crop-mark crop-bl"></div>
-            <div class="crop-mark crop-br"></div>
-          </div>
+          <div class="guide-trim-line"></div>
           <div class="guide-safe-zone"></div>
         </div>
-        <div class="card-trim-box f-layout-center-logo" id="trim-front">
+        <div class="card-trim-box" id="trim-front">
           <div class="decor-frame" id="outFrontFrame"></div>
-
-          <!-- 로고 영역 (업로드 이미지 또는 모노그램) -->
-          <div class="front-logo-area" id="outFrontLogoArea"></div>
-
-          <!-- 하단 부가정보 영역 -->
-          <div class="front-info-area">
-            <div class="front-main-title" id="outFrontStage">AIDEN KIM</div>
-            <div class="front-sub-info" id="outFrontRole">MUSIC PRODUCER & COMPOSER</div>
-            <div class="front-line-box dia-center" id="outFrontLineBox"></div>
+          <div class="front-card-inner f-layout-center-logo" id="outFrontInner">
+            <div class="front-top-caption" id="outFrontTopCap">ORIGINAL SOUND // SEOUL</div>
+            <div class="front-logo-area" id="outFrontLogoArea"></div>
+            <div class="front-info-area" id="outFrontInfoArea">
+              <div class="front-stage-name" id="outFrontStage">HamRanè</div>
+              <div class="front-role-title" id="outFrontRole">MUSIC PRODUCER & COMPOSER</div>
+              <div class="front-line-box dia-center" id="outFrontLineBox">
+                <span class="front-line-gem"><span class="true-diamond sm"></span></span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
