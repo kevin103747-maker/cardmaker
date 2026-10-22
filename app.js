@@ -1233,12 +1233,94 @@ window.onload = () => {
   updateFrontCard();
 };
 
+// 일반 16:9 모니터부터 21:9 / 32:9 울트라와이드 모니터까지 완벽 지원하는 1:1 실물 크기 보정
 function toggleActualSize() {
   const wrap = document.getElementById('stageWrap');
   const btn = document.getElementById('tabActualSize');
-  wrap.classList.toggle('actual-size');
-  btn?.classList.toggle('active');
+  const isActivating = !wrap.classList.contains('actual-size');
+
+  wrap.classList.toggle('actual-size', isActivating);
+  btn?.classList.toggle('active', isActivating);
+
+  let calBar = document.getElementById('actualSizeCalibrator');
+  if (!isActivating) {
+    if (calBar) calBar.style.display = 'none';
+    document.querySelectorAll('.card-bleed-container').forEach(el => {
+      el.style.transform = '';
+      el.style.margin = '';
+    });
+    return;
+  }
+
+  if (!calBar) {
+    calBar = document.createElement('div');
+    calBar.id = 'actualSizeCalibrator';
+    calBar.style.cssText = 'position:sticky;top:62px;margin:8px auto 0;z-index:35;background:rgba(22,23,26,0.94);border:1px solid #38bdf8;padding:7px 14px;border-radius:8px;display:flex;align-items:center;gap:12px;font-size:11.5px;color:#e2e8f0;box-shadow:0 8px 20px rgba(0,0,0,0.45);';
+    const savedInch = localStorage.getItem('user_monitor_inch') || '34';
+    calBar.innerHTML = `
+      <span style="color:#38bdf8;font-weight:700;"><i class="fa-solid fa-ruler-combined"></i> 실물 90×50mm 보정:</span>
+      <label style="display:flex;align-items:center;gap:5px;">
+        모니터 대각선 크기
+        <input type="number" id="inMonitorInch" value="${savedInch}" min="11" max="57" step="0.5" style="width:52px;background:#121316;border:1px solid #475569;color:#fff;padding:3px 6px;border-radius:4px;font-size:11.5px;text-align:center;" oninput="applyTruePhysicalScale()"> 인치
+      </label>
+      <span id="outDetectedRes" style="font-size:10.5px;color:#94a3b8;font-family:monospace;"></span>
+      <span style="opacity:0.35;">|</span>
+      <label style="display:flex;align-items:center;gap:6px;" title="신용카드(가로 85.6mm)나 명함(90mm)을 화면에 대고 미세조절 가능">
+        미세조절
+        <input type="range" id="rCalScale" min="0.25" max="0.85" step="0.005" value="0.45" style="width:90px;" oninput="applyManualCalScale(this.value)">
+        <span id="vCalScale" style="font-family:monospace;color:#818cf8;width:38px;">45%</span>
+      </label>
+    `;
+    const stage = document.querySelector('.studio-stage');
+    stage.insertBefore(calBar, wrap);
+  } else {
+    calBar.style.display = 'flex';
+  }
+
+  applyTruePhysicalScale();
 }
+
+function applyTruePhysicalScale() {
+  const inch = parseFloat(document.getElementById('inMonitorInch')?.value) || 34;
+  localStorage.setItem('user_monitor_inch', inch);
+
+  // screen.width와 screen.height는 와이드 모니터(21:9, 32:9 등)의 실제 가로/세로 CSS 픽셀 비율을 그대로 반영함
+  const cssW = window.screen.width;
+  const cssH = window.screen.height;
+  const cssDiag = Math.sqrt(cssW * cssW + cssH * cssH);
+
+  // 1인치(25.4mm)당 CSS 픽셀 수 = 대각선 CSS 픽셀 / 모니터 인치
+  const cssPixelsPerMm = (cssDiag / inch) / 25.4;
+
+  // 감지된 와이드 해상도 및 비율 표시
+  const resEl = document.getElementById('outDetectedRes');
+  if (resEl) {
+    const dpr = window.devicePixelRatio || 1;
+    resEl.textContent = `(${Math.round(cssW * dpr)}×${Math.round(cssH * dpr)})`;
+  }
+
+  // 명함 재단선 가로폭(756px)이 정확히 90mm가 되는 배율 산출
+  const target90mmInCssPx = 90 * cssPixelsPerMm;
+  const exactScale = Math.min(Math.max(target90mmInCssPx / 756, 0.25), 0.95);
+
+  const slider = document.getElementById('rCalScale');
+  if (slider) slider.value = exactScale.toFixed(3);
+  applyManualCalScale(exactScale);
+}
+
+function applyManualCalScale(scaleVal) {
+  const s = parseFloat(scaleVal);
+  const badge = document.getElementById('vCalScale');
+  if (badge) badge.textContent = Math.round(s * 100) + '%';
+
+  const vMargin = -Math.round((1 - s) * 210);
+  document.querySelectorAll('.card-bleed-container').forEach(el => {
+    el.style.transform = `scale(${s})`;
+    el.style.transformOrigin = 'center center';
+    el.style.margin = `${vMargin}px 0`;
+  });
+}
+
 // [복원] 연락처 및 플레이어 텍스트 안전 변환 함수
 function escapeXml(unsafe) {
   return String(unsafe || '').replace(/[<>&'"]/g, c => {
