@@ -592,22 +592,40 @@ function updateDecorations() {
   const widget = document.getElementById('selMusicWidget')?.value || 'player';
   const stampText = document.getElementById('inTopStamp')?.value.trim() || '';
 
-  // 1) 중앙 다이아몬드 세로선 (폰트에 따라 작아지지 않는 진짜 기하학 도형 사용)
+  // 1) 중앙 세로선 & 다이아몬드 일체형 SVG 렌더링 (좌우 축 오차 0.00px 보장)
   const divLine = document.getElementById('outDividerLine');
-  const gemEl = document.getElementById('outDividerGem');
-  if (divLine && gemEl) {
-    divLine.className = 'back-divider-line' + (diaType === 'fade-dia' ? ' fade-dia' : '');
-    gemEl.className = 'divider-gem' + (diaType === 'double-gem' ? ' double-gem' : '');
+  if (divLine) {
+    divLine.className = 'back-divider-svg-host';
+    const dSz = parseFloat(diaSz) || 8;
+    const r = dSz * 0.72; // 마름모 반지름 (정중앙 x=12 기준 완벽 대칭)
+    let gemSvg = '';
 
     if (diaType === 'solid' || diaType === 'fade-dia') {
-      gemEl.innerHTML = '<span class="true-diamond"></span>';
+      gemSvg = `<rect x="0" y="${200 - r - 6}" width="24" height="${(r + 6) * 2}" fill="var(--card-bg)" />
+                <polygon points="12,${200 - r} ${12 + r},200 12,${200 + r} ${12 - r},200" fill="var(--accent)" />`;
     } else if (diaType === 'hollow') {
-      gemEl.innerHTML = '<span class="true-diamond hollow"></span>';
+      gemSvg = `<rect x="0" y="${200 - r - 6}" width="24" height="${(r + 6) * 2}" fill="var(--card-bg)" />
+                <polygon points="12,${200 - r} ${12 + r},200 12,${200 + r} ${12 - r},200" fill="var(--card-bg)" stroke="var(--accent)" stroke-width="1.3" />`;
     } else if (diaType === 'triple') {
-      gemEl.innerHTML = '<span class="true-diamond sm" style="opacity:0.55"></span><span class="true-diamond"></span><span class="true-diamond sm" style="opacity:0.55"></span>';
+      const sr = r * 0.58;
+      gemSvg = `<rect x="0" y="${200 - r - 18}" width="24" height="${(r + 18) * 2}" fill="var(--card-bg)" />
+                <polygon points="12,${186 - sr} ${12 + sr},186 12,${186 + sr} ${12 - sr},186" fill="var(--accent)" opacity="0.55" />
+                <polygon points="12,${200 - r} ${12 + r},200 12,${200 + r} ${12 - r},200" fill="var(--accent)" />
+                <polygon points="12,${214 - sr} ${12 + sr},214 12,${214 + sr} ${12 - sr},214" fill="var(--accent)" opacity="0.55" />`;
     } else if (diaType === 'double-gem') {
-      gemEl.innerHTML = '<span><span class="true-diamond"></span></span><span><span class="true-diamond"></span></span>';
+      gemSvg = `<rect x="0" y="${200 - r - 12}" width="24" height="${(r + 12) * 2}" fill="var(--card-bg)" />
+                <polygon points="12,${193 - r*0.85} ${12 + r*0.85},193 12,${193 + r*0.85} ${12 - r*0.85},193" fill="var(--accent)" />
+                <polygon points="12,${207 - r*0.85} ${12 + r*0.85},207 12,${207 + r*0.85} ${12 - r*0.85},207" fill="var(--accent)" />`;
     }
+
+    divLine.innerHTML = `
+      <svg width="24" height="100%" viewBox="0 0 24 400" preserveAspectRatio="none" style="position:absolute;top:0;left:50%;transform:translateX(-50%);height:100%;width:24px;overflow:visible;">
+        <line x1="12" y1="0" x2="12" y2="400" stroke="var(--accent)" stroke-width="var(--divider-width, 1.2px)" opacity="0.78" />
+      </svg>
+      <svg width="24" height="400" viewBox="0 0 24 400" style="position:relative;width:24px;height:100%;overflow:visible;z-index:2;">
+        ${gemSvg}
+      </svg>
+    `;
   }
 
   // 2) 이름 하단 포인트 룰
@@ -1182,9 +1200,25 @@ function updateFrontCard() {
     roleEl.style.display = subTxt ? 'block' : 'none';
   }
   if (lineBox) {
-    lineBox.className = 'front-line-box ' + lineStyle;
-    if (lineStyle === 'dia-center' || lineStyle === 'dia-end') {
-      lineBox.innerHTML = '<span class="front-line-gem"><span class="true-diamond sm"></span></span>';
+    lineBox.className = 'front-line-svg-host';
+    lineBox.style.display = (lineStyle === 'none') ? 'none' : 'flex';
+    if (lineStyle === 'dia-center') {
+      lineBox.innerHTML = `
+        <svg width="180" height="16" viewBox="0 0 180 16" style="overflow:visible;display:block;">
+          <line x1="0" y1="8" x2="78" y2="8" stroke="var(--accent)" stroke-width="1" opacity="0.55" />
+          <polygon points="90,3.8 94.2,8 90,12.2 85.8,8" fill="var(--accent)" />
+          <line x1="102" y1="8" x2="180" y2="8" stroke="var(--accent)" stroke-width="1" opacity="0.55" />
+        </svg>`;
+    } else if (lineStyle === 'dia-end') {
+      lineBox.innerHTML = `
+        <svg width="100%" height="16" viewBox="0 0 240 16" preserveAspectRatio="none" style="overflow:visible;display:block;width:100%;">
+          <line x1="0" y1="8" x2="226" y2="8" stroke="var(--accent)" stroke-width="1" opacity="0.55" />
+          <polygon points="235,3.8 239.2,8 235,12.2 230.8,8" fill="var(--accent)" />
+        </svg>`;
+    } else if (lineStyle === 'short') {
+      lineBox.innerHTML = `<svg width="36" height="6" viewBox="0 0 36 6"><line x1="0" y1="3" x2="36" y2="3" stroke="var(--accent)" stroke-width="1.5" opacity="0.85"/></svg>`;
+    } else if (lineStyle === 'full') {
+      lineBox.innerHTML = `<svg width="100%" height="6" viewBox="0 0 200 6" preserveAspectRatio="none" style="width:100%;"><line x1="0" y1="3" x2="200" y2="3" stroke="var(--accent)" stroke-width="1" opacity="0.45"/></svg>`;
     } else {
       lineBox.innerHTML = '';
     }

@@ -1502,3 +1502,28 @@ input[type="range"] {
   word-break: keep-all !important;
   flex-shrink: 0 !important;
 }
+/* ================= 앞·뒷면 선 & 다이아몬드 일체형 SVG 정밀 정렬 ================= */
+.back-divider-svg-host {
+  position: relative !important;
+  width: 24px !important;
+  height: var(--divider-height, 92%) !important;
+  background: transparent !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 0 calc(var(--divider-gap, 38px) / 2 - 12px) !important;
+  flex-shrink: 0 !important;
+}
+
+.front-line-svg-host {
+  width: 100% !important;
+  margin-top: 10px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: transparent !important;
+}
+
+.f-layout-original-line .front-line-svg-host {
+  justify-content: flex-start !important;
+}
