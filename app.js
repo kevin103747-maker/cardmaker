@@ -982,12 +982,12 @@ function exportPrintPDF() {
 
       // 1페이지: 앞면
       const frontDataUrl = await captureCardToDataUrl(frontEl, 4);
-      pdf.addImage(frontDataUrl, 'PNG', 0, 0, wMm, hMm);
+      pdf.addImage(frontDataUrl, 'PNG', 0, 0, wMm, hMm, undefined, 'FAST');
 
       // 2페이지: 뒷면
       pdf.addPage([wMm, hMm], 'landscape');
       const backDataUrl = await captureCardToDataUrl(backEl, 4);
-      pdf.addImage(backDataUrl, 'PNG', 0, 0, wMm, hMm);
+      pdf.addImage(backDataUrl, 'PNG', 0, 0, wMm, hMm, undefined, 'FAST');
 
       const name = document.getElementById('inStage')?.value.trim() || 'Card';
       pdf.save(`${name}_인쇄소입고용_양면명함(${wMm}x${hMm}mm).pdf`);
