@@ -1239,3 +1239,15 @@ function toggleActualSize() {
   wrap.classList.toggle('actual-size');
   btn?.classList.toggle('active');
 }
+// [복원] 연락처 및 플레이어 텍스트 안전 변환 함수
+function escapeXml(unsafe) {
+  return String(unsafe || '').replace(/[<>&'"]/g, c => {
+    switch (c) {
+      case '<': return '&lt;';
+      case '>': return '&gt;';
+      case '&': return '&amp;';
+      case '\'': return '&apos;';
+      case '"': return '&quot;';
+    }
+  });
+}
