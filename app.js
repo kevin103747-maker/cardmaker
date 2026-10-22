@@ -852,7 +852,7 @@ function convertIconsAndSymbolsToPureSVG(rootEl) {
   });
 
   // 2) 텍스트 노드 안의 특수기호(◆, ◇, ↗)가 [☒]로 깨지거나 작아지지 않도록 SVG 도형으로 치환
-  const diaElements = rootEl.querySelectorAll('.srv-sep-dia, .front-line-gem, .front-symbol-mark, #outDividerGem, #outQrCaption');
+  const diaElements = rootEl.querySelectorAll('.srv-sep-dia, .front-line-gem, .front-symbol-mark, #outQrCaption');
   diaElements.forEach(el => {
     const oldHtml = el.innerHTML;
     if (oldHtml.includes('◆') || oldHtml.includes('◇') || oldHtml.includes('↗')) {

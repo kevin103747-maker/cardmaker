@@ -1270,3 +1270,74 @@ input[type="range"] {
 .card-bleed-container::after {
   display: none !important;
 }
+/* ================= [최종 정밀 교정] 다이아몬드 3곳 중심축 & 잘림 완벽 해결 ================= */
+
+/* 1) 좌측 컬럼의 overflow: hidden 해제 (상단 스탬프 왼쪽이 잘리는 현상 원천 해결) */
+.back-left-col {
+  overflow: visible !important;
+}
+
+/* 상단 스탬프 앞 심볼: 잘리지 않도록 좌측 여백 확보 + 세련된 프리즘/바 형태 정렬 */
+.decor-top-stamp {
+  padding-left: 2px;
+}
+.decor-top-stamp::before {
+  content: "" !important;
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  background-color: var(--accent);
+  transform: rotate(45deg);
+  margin-right: 2px;
+  flex-shrink: 0;
+}
+
+/* 2) 플레이어 바 다이아몬드 노브: 가로 트랙의 상하 정중앙(top: 50%)에 0.01px 오차 없이 고정 */
+.player-track {
+  flex: 1;
+  height: 1.5px;
+  background: rgba(128, 128, 128, 0.28);
+  position: relative !important;
+  display: block !important;
+}
+.player-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 42%;
+  height: 100%;
+  background: var(--accent);
+}
+.player-knob {
+  position: absolute !important;
+  left: 42% !important;
+  top: 50% !important;
+  width: 5.5px !important;
+  height: 5.5px !important;
+  background: var(--accent) !important;
+  transform: translate(-50%, -50%) rotate(45deg) !important;
+  margin: 0 !important;
+}
+
+/* 3) 명함 중앙 세로선 다이아몬드: 세로선의 가로축(left: 50%)과 세로축(top: 50%) 정중앙에 절대좌표로 고정 */
+.back-divider-line {
+  position: relative !important;
+}
+.divider-gem {
+  position: absolute !important;
+  left: 50% !important;
+  top: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  padding: 6px 4px !important;
+  margin: 0 !important;
+  background-color: var(--card-bg) !important;
+  display: flex !important;
+   flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+.divider-gem .true-diamond {
+  display: block !important;
+  margin: 0 !important;
+  transform: rotate(45deg) !important;
+}
