@@ -295,6 +295,8 @@ function resetSingleSlider(id, defaultVal) {
   if (el) {
     el.value = defaultVal;
     updateLayoutVars();
+    updateDecorations();
+    if (typeof updateFrontCard === 'function') updateFrontCard();
   }
 }
 
@@ -1069,31 +1071,27 @@ function resetSingleFront(id, defaultVal) {
 }
 
 function updateFrontCard() {
-  const fColMode = document.getElementById('selFrontColorMode')?.value || 'custom';
-  const pickerWrap = document.getElementById('frontColorPickersWrap');
-  if (pickerWrap) {
-    pickerWrap.style.display = fColMode === 'custom' ? 'grid' : 'none';
+  const colorMode = document.getElementById('selFrontColorMode')?.value || 'custom';
+  const pickersWrap = document.getElementById('frontColorPickersWrap');
+  if (pickersWrap) {
+    pickersWrap.style.display = (colorMode === 'custom') ? 'grid' : 'none';
   }
 
+  const bBg = document.getElementById('cBg')?.value || '#ffffff';
+  const bMain = document.getElementById('cMain')?.value || '#161616';
+  const bSub = document.getElementById('cSub')?.value || '#767676';
+  const bAcc = document.getElementById('cAcc')?.value || '#181818';
+
   let fBg, fMain, fSub, fAcc;
-  if (fColMode === 'sync') {
-    // 뒷면 색상과 100% 동일하게 동기화
-    fBg = document.getElementById('cBg')?.value || '#ffffff';
-    fMain = document.getElementById('cMain')?.value || '#161616';
-    fSub = document.getElementById('cSub')?.value || '#767676';
-    fAcc = document.getElementById('cAcc')?.value || '#181818';
-  } else if (fColMode === 'invert') {
-    // 뒷면과 반전 대비 (뒷면 배경색을 앞면 글자색으로, 뒷면 글자색을 앞면 배경색으로)
-    fBg = document.getElementById('cMain')?.value || '#161616';
-    fMain = document.getElementById('cBg')?.value || '#ffffff';
-    fSub = document.getElementById('cSub')?.value || '#9ca3af';
-    fAcc = document.getElementById('cBg')?.value || '#ffffff';
+  if (colorMode === 'sync') {
+    fBg = bBg; fMain = bMain; fSub = bSub; fAcc = bAcc;
+  } else if (colorMode === 'invert') {
+    fBg = bMain; fMain = bBg; fSub = bSub; fAcc = bBg;
   } else {
-    // 앞면 개별 지정 컬러피커 값 사용
-    fBg = document.getElementById('cFBg')?.value || '#141517';
-    fMain = document.getElementById('cFMain')?.value || '#f3f4f6';
-    fSub = document.getElementById('cFSub')?.value || '#9ca3af';
-    fAcc = document.getElementById('cFAcc')?.value || '#e5e7eb';
+    fBg = document.getElementById('cFBg')?.value || '#223E33';
+    fMain = document.getElementById('cFMain')?.value || '#F1FBF5';
+    fSub = document.getElementById('cFSub')?.value || '#8FAEA0';
+    fAcc = document.getElementById('cFAcc')?.value || '#F1FBF5';
   }
 
   if (document.getElementById('hFBg')) document.getElementById('hFBg').textContent = fBg.toUpperCase();
@@ -1107,80 +1105,98 @@ function updateFrontCard() {
   root.style.setProperty('--f-text-sub', fSub);
   root.style.setProperty('--f-accent', fAcc);
 
-  const logoMode = document.getElementById('selFrontLogoMode')?.value || 'monogram';
-  const logoSz = document.getElementById('rFLogoSz')?.value || 64;
-  const logoFilter = document.getElementById('selLogoFilter')?.value || 'none';
+  const fSliders = [
+    ['rFLogoSz', 'vFLogoSz', '--f-logo-size', 'px'],
+    ['rFLogoY', 'vFLogoY', '--f-logo-y', 'px'],
+    ['rFMainSz', 'vFMainSz', '--f-main-size', 'px'],
+    ['rFMainTrk', 'vFMainTrk', '--f-main-track', 'px'],
+    ['rFSubSz', 'vFSubSz', '--f-sub-size', 'px'],
+    ['rFSubTrk', 'vFSubTrk', '--f-sub-track', 'px']
+  ];
+  fSliders.forEach(([inId, valId, cssVar, unit]) => {
+    const el = document.getElementById(inId);
+    if (!el) return;
+    const v = el.value;
+    const badge = document.getElementById(valId);
+    if (badge) badge.textContent = v + unit;
+    root.style.setProperty(cssVar, v + unit);
+  });
+
+  const mode = document.getElementById('selFrontLogoMode')?.value || 'monogram';
+  const filter = document.getElementById('selLogoFilter')?.value || 'none';
   const layout = document.getElementById('selFrontLayout')?.value || 'center-logo';
   const lineStyle = document.getElementById('selFrontLine')?.value || 'dia-center';
-  const mainTxt = document.getElementById('inFrontMainText')?.value.trim() ?? 'AIDEN KIM';
-  const subTxt = document.getElementById('inFrontSubText')?.value.trim() ?? '';
-  const frameStyle = document.getElementById('selFrameStyle')?.value || 'corner-bracket';
+  const topCap = document.getElementById('inFrontTopCap')?.value.trim() || '';
+  const mainTxt = document.getElementById('inFrontMainText')?.value.trim() || '';
+  const subTxt = document.getElementById('inFrontSubText')?.value.trim() || '';
+  const backFrameStyle = document.getElementById('selFrameStyle')?.value || 'none';
 
-  if (document.getElementById('vFLogoSz')) {
-    document.getElementById('vFLogoSz').textContent = logoSz + 'px';
-  }
-  root.style.setProperty('--f-logo-size', logoSz + 'px');
-
-
-  // 앞면 전체 구도 클래스 적용
-  const trimFront = document.getElementById('trim-front');
-  if (trimFront) {
-    trimFront.className = 'card-trim-box f-layout-' + layout.toLowerCase();
-  }
-
-  // 앞면 외곽 프레임도 뒷면과 통일
   const fFrame = document.getElementById('outFrontFrame');
   if (fFrame) {
-    fFrame.className = 'decor-frame' + (frameStyle !== 'none' ? ' ' + frameStyle : '');
+    fFrame.className = 'decor-frame' + (backFrameStyle !== 'none' ? ' ' + backFrameStyle : '');
   }
 
-  // 로고 영역 렌더링
+  const trimFront = document.getElementById('trim-front');
+  if (trimFront) {
+    trimFront.className = 'card-trim-box f-layout-' + layout;
+  }
+
+  const topCapEl = document.getElementById('outFrontTopCap');
+  if (topCapEl) {
+    topCapEl.textContent = topCap;
+    topCapEl.style.display = topCap ? 'block' : 'none';
+  }
+
   const logoArea = document.getElementById('outFrontLogoArea');
   if (logoArea) {
-    logoArea.style.display = logoMode === 'none' ? 'none' : 'flex';
-    if (logoMode === 'upload') {
+    logoArea.style.display = mode === 'none' ? 'none' : 'flex';
+    if (mode === 'upload') {
       if (uploadedLogoDataUrl) {
-        const filterCls = logoFilter !== 'none' ? ' ' + logoFilter : '';
-        logoArea.innerHTML = `<img src="${uploadedLogoDataUrl}" class="front-uploaded-logo${filterCls}" alt="Logo" />`;
+        const filterCls = filter !== 'none' ? ' ' + filter : '';
+        logoArea.innerHTML = `<img src="${uploadedLogoDataUrl}" class="front-uploaded-logo${filterCls}" alt="Logo">`;
       } else {
-        logoArea.innerHTML = `<div class="front-monogram-badge"><span>LOGO</span></div>`;
+        const initChar = (mainTxt || 'H').charAt(0).toUpperCase();
+        logoArea.innerHTML = `<div class="front-monogram-badge"><span>${initChar}</span></div>`;
       }
-    } else if (logoMode === 'monogram') {
-      const st = (mainTxt || document.getElementById('inStage')?.value || 'A').trim();
-      const initials = st.split(/\s+/).map(w => w[0]).join('').substring(0, 2).toUpperCase();
-      logoArea.innerHTML = `<div class="front-monogram-badge"><span>${initials}</span></div>`;
-    } else if (logoMode === 'symbol') {
-      logoArea.innerHTML = `<div class="front-symbol-mark">◆</div>`;
+    } else if (mode === 'monogram') {
+      const initChar = (mainTxt || 'H').charAt(0).toUpperCase();
+      logoArea.innerHTML = `<div class="front-monogram-badge"><span>${initChar}</span></div>`;
+    } else if (mode === 'symbol') {
+      logoArea.innerHTML = `<div class="front-symbol-mark"><span class="true-diamond" style="width:18px;height:18px;display:inline-block;background:var(--accent);transform:rotate(45deg);"></span></div>`;
     } else {
       logoArea.innerHTML = '';
     }
   }
 
-  // 앞면 텍스트 및 부가정보 렌더링
-  const fStage = document.getElementById('outFrontStage');
-  const fRole = document.getElementById('outFrontRole');
-  if (fStage) {
-    fStage.textContent = mainTxt;
-    fStage.style.display = mainTxt ? 'block' : 'none';
-  }
-  if (fRole) {
-    fRole.textContent = subTxt;
-    fRole.style.display = subTxt ? 'block' : 'none';
-  }
-
-  // 앞면 하단 포인트 라인
+  const stageEl = document.getElementById('outFrontStage');
+  const roleEl = document.getElementById('outFrontRole');
   const lineBox = document.getElementById('outFrontLineBox');
+  const infoArea = document.getElementById('outFrontInfoArea');
+
+  if (stageEl) {
+    stageEl.textContent = mainTxt;
+    stageEl.style.display = mainTxt ? 'block' : 'none';
+  }
+  if (roleEl) {
+    roleEl.textContent = subTxt;
+    roleEl.style.display = subTxt ? 'block' : 'none';
+  }
   if (lineBox) {
     lineBox.className = 'front-line-box ' + lineStyle;
     if (lineStyle === 'dia-center' || lineStyle === 'dia-end') {
-      lineBox.innerHTML = `<span class="front-line-gem">◆</span>`;
+      lineBox.innerHTML = '<span class="front-line-gem"><span class="true-diamond sm"></span></span>';
     } else {
       lineBox.innerHTML = '';
     }
   }
+  if (infoArea) {
+    const hasAnyInfo = mainTxt || subTxt || lineStyle !== 'none';
+    infoArea.style.display = hasAnyInfo ? 'flex' : 'none';
+  }
 
   saveStateToLocal();
 }
+
 
 // 초기 실행
 window.onload = () => {

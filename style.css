@@ -1455,6 +1455,8 @@ input[type="range"] {
   text-transform: uppercase;
   text-align: center;
   line-height: 1;
+  width: 100%;
+  z-index: 2;
 }
 
 .f-layout-original-line .front-top-caption {
@@ -1465,20 +1467,38 @@ input[type="range"] {
   transform: translateY(var(--f-logo-y, 0px)) !important;
 }
 
-.front-stage-name {
+.front-main-title {
   font-size: var(--f-main-size, 20px) !important;
   letter-spacing: var(--f-main-track, 1.5px) !important;
 }
 
-.front-role-title {
+.front-sub-info {
   font-size: var(--f-sub-size, 9.5px) !important;
   letter-spacing: var(--f-sub-track, 2.5px) !important;
 }
 
-.front-line-gem .true-diamond {
-  width: 5px !important;
-  height: 5px !important;
-  background-color: var(--accent) !important;
-  transform: rotate(45deg) !important;
-  display: block !important;
+/* ================= 인디고 인쇄용 텍스트 굵기(Weight) 미세 보정 ================= */
+/* 1) 앞면 어두운 배경 위 작은 글씨들이 잉크에 먹히지 않도록 세미볼드(600)로 보강 */
+.front-top-caption,
+.front-sub-info {
+  font-weight: 600 !important;
+}
+
+/* 2) 뒷면 연락처 본문(500) 및 서브 기호(400)가 흐려지지 않도록 탄탄하게 고정 */
+.c-text {
+  font-weight: 500 !important;
+}
+.c-text .tone-sub {
+  font-weight: 400 !important;
+}
+/* ================= PDF 캡처 시 전화번호·연락처 강제 줄바꿈 원천 차단 ================= */
+.contact-row,
+.c-text,
+.c-text span,
+.social-handle,
+.srv-line-row,
+.name-line-main {
+  white-space: nowrap !important;
+  word-break: keep-all !important;
+  flex-shrink: 0 !important;
 }
