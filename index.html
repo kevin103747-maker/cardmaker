@@ -185,14 +185,19 @@
             <label class="lbl">3중 이름 배치 스타일</label>
             <select id="selNameStyle" class="inp" onchange="renderCardContent()">
               <option value="two-line" selected>윗줄: 영문+한글예명 / 아랫줄: 본명</option>
-              <option value="inline-all">한 줄: AIDEN KIM · 에이든 | 김도현</option>
-              <option value="bracket">괄호 병기: AIDEN KIM (에이든 / 김도현)</option>
+              <option value="inline-all">한 줄: HamRanè · 햄버거라네 | 황병욱</option>
+              <option value="bracket">괄호 병기: HamRanè (햄버거라네 / 황병욱)</option>
               <option value="en-top">윗줄: 영문예명 / 아랫줄: 한글예명 · 본명</option>
             </select>
           </div>
           <div>
-            <label class="lbl">앞면 직함 (Front Title)</label>
-            <input type="text" id="inFrontRole" class="inp" value="Music Producer & Composer" oninput="renderCardContent()">
+            <label class="lbl">영문예명 ↔ 한글예명 사이 기호</label>
+            <select id="selStageSep" class="inp" onchange="renderCardContent()">
+              <option value="space" selected>공백만 두기 (기본)</option>
+              <option value="dia">마이크로 다이아몬드 (◆)</option>
+              <option value="dot">미니멀 도트 (·)</option>
+              <option value="slash">슬래시 (/)</option>
+            </select>
           </div>
         </div>
         <div class="grid-2">
@@ -372,9 +377,34 @@ Vocal Directing, Mixing & Mastering</textarea>
             </select>
           </div>
         </div>
-        <div class="field-row" style="margin-top:6px;">
-          <label class="lbl">상단 스튜디오 메타 스탬프 (비워두면 숨김)</label>
-          <input type="text" id="inTopStamp" class="inp" value="STUDIO MASTER // 24BIT 96KHZ" placeholder="비워두면 숨김" oninput="updateDecorations()">
+        <!-- [추가] 플레이어 바 시간(이스터에그) 및 노브 위치(%) 커스텀 -->
+        <div class="grid-3" style="margin-top:8px;">
+          <div>
+            <label class="lbl">플레이어 현재시간</label>
+            <input type="text" id="inPlayCur" class="inp" value="01:28" oninput="updateDecorations()">
+          </div>
+          <div>
+            <label class="lbl">플레이어 전체시간</label>
+            <input type="text" id="inPlayEnd" class="inp" value="03:42" oninput="updateDecorations()">
+          </div>
+          <div>
+            <label class="lbl"><span>노브 위치</span><span class="val-badge" id="vPlayPos">42%</span></label>
+            <input type="range" id="rPlayPos" min="10" max="90" value="42" ondblclick="resetSingleSlider('rPlayPos', 42)" oninput="updateDecorations()">
+          </div>
+        </div>
+
+        <div class="grid-2" style="margin-top:6px; margin-bottom:0;">
+          <div>
+            <label class="lbl">상단 스튜디오 메타 스탬프</label>
+            <input type="text" id="inTopStamp" class="inp" value="MUSIC PRODUCER // COMPOSER" placeholder="비워두면 숨김" oninput="updateDecorations()">
+          </div>
+          <div>
+            <label class="lbl">연락처 기호(-, @, www) 톤다운</label>
+            <select id="selContactTone" class="inp" onchange="renderCardContent()">
+              <option value="normal">단색 통일 (기본)</option>
+              <option value="subtle" selected>기호만 은은하게 톤다운 (가독성↑)</option>
+            </select>
+          </div>
         </div>
       </div>
 
@@ -514,8 +544,8 @@ Vocal Directing, Mixing & Mastering</textarea>
         <button class="tab-btn" id="tabFlatBoth" onclick="switchView('flat-both')">
           <i class="fa-solid fa-layer-group"></i> 앞·뒷면 동시 보기
         </button>
-        <button class="tab-btn" id="tabMockup3D" onclick="switchView('mockup-3d')">
-          <i class="fa-solid fa-cube"></i> 3D 목업 뷰
+        <button class="tab-btn" id="tabActualSize" onclick="toggleActualSize()" title="실제 인쇄될 손바닥 명함 크기로 축소해서 가독성 점검">
+          <i class="fa-solid fa-compress"></i> 1:1 실물 크기 체감
         </button>
       </div>
       <div class="autosave-indicator" id="autoSaveBadge">

@@ -415,18 +415,28 @@ function renderCardContent() {
   const servicesRaw = document.getElementById('inServices')?.value || '';
   const cPrefixMode = document.getElementById('selContactPrefix')?.value || 'none';
   const socialHandle = document.getElementById('inSocialHandle')?.value || '';
+  const stageSepMode = document.getElementById('selStageSep')?.value || 'space';
+  let stageSepHtml = '';
+  if (stageKr) {
+    if (stageSepMode === 'dia') stageSepHtml = `<span class="stage-sep-mark">◆</span>`;
+    else if (stageSepMode === 'dot') stageSepHtml = `<span class="stage-sep-mark">·</span>`;
+    else if (stageSepMode === 'slash') stageSepHtml = `<span class="stage-sep-mark">/</span>`;
+  }
+
   const nameGroup = document.getElementById('outBackNameGroup');
   let nameHtml = '';
 
   if (nameStyle === 'two-line') {
     nameHtml = `<div class="name-line-main">
       <span class="back-stage-en">${stageEn}</span>
+      ${stageSepHtml}
       ${stageKr ? `<span class="back-stage-kr">${stageKr}</span>` : ''}
     </div>
     ${real ? `<div class="back-real-name-tag">${real}</div>` : ''}`;
   } else if (nameStyle === 'inline-all') {
     nameHtml = `<div class="name-line-main">
       <span class="back-stage-en">${stageEn}</span>
+      ${stageSepHtml}
       ${stageKr ? `<span class="back-stage-kr">${stageKr}</span>` : ''}
       ${real ? `<span class="name-sep-dot">|</span><span class="back-real-name-tag">${real}</span>` : ''}
     </div>`;
@@ -516,6 +526,10 @@ function renderCardContent() {
   // 좌측 연락처 (심볼 단독 고정 + 선택적 마이크로 코드)
   const cList = document.getElementById('outContactList');
   cList.innerHTML = '';
+  // 좌측 연락처 (심볼 단독 고정 + 기호 톤다운 디테일)
+  const toneMode = document.getElementById('selContactTone')?.value || 'subtle';
+  const cList = document.getElementById('outContactList');
+  cList.innerHTML = '';
   contacts.forEach(c => {
     const row = document.createElement('div');
     row.className = 'contact-row';
@@ -525,7 +539,16 @@ function renderCardContent() {
     } else if (cPrefixMode === 'dot') {
       prefixHtml = `<span class="c-prefix">•</span>`;
     }
-    row.innerHTML = `<span class="c-icon-box"><i class="${c.icon}"></i></span>${prefixHtml}<span class="c-text">${c.text}</span>`;
+
+    let formattedText = escapeXml(c.text);
+    if (toneMode === 'subtle') {
+      // 하이픈(-), 골뱅이(@), 슬래시(/), www. 등을 은은하게 처리해 핵심 숫자와 아이디 강조
+      formattedText = formattedText
+        .replace(/([-@/])/g, '<span class="tone-sub">$1</span>')
+        .replace(/^(www\.)/i, '<span class="tone-sub">$1</span>');
+    }
+
+    row.innerHTML = `<span class="c-icon-box"><i class="${c.icon}"></i></span>${prefixHtml}<span class="c-text">${formattedText}</span>`;
     cList.appendChild(row);
   });
 
@@ -633,14 +656,24 @@ function updateDecorations() {
   const wEl = document.getElementById('outMusicWidget');
   if (wEl) {
     if (widget === 'player') {
+      const playCur = document.getElementById('inPlayCur')?.value || '01:28';
+      const playEnd = document.getElementById('inPlayEnd')?.value || '03:42';
+      const playPos = document.getElementById('rPlayPos')?.value || 42;
+      if (document.getElementById('vPlayPos')) {
+        document.getElementById('vPlayPos').textContent = playPos + '%';
+      }
       wEl.innerHTML = `<div class="mini-player-bar">
-        <span>01:28</span>
-        <div class="player-track"><div class="player-fill"></div><div class="player-knob"></div></div>
-        <span>03:42</span>
+        <span>${escapeXml(playCur)}</span>
+        <div class="player-track">
+          <div class="player-fill" style="width:${playPos}%"></div>
+          <div class="player-knob" style="left:${playPos}% !important"></div>
+        </div>
+        <span>${escapeXml(playEnd)}</span>
         <i class="fa-solid fa-backward-step" style="font-size:8px"></i>
         <i class="fa-solid fa-play" style="font-size:8px"></i>
         <i class="fa-solid fa-forward-step" style="font-size:8px"></i>
       </div>`;
+    }
     } else if (widget === 'wave') {
       const h = [4, 9, 13, 6, 11, 14, 7, 4, 10, 13, 5, 8, 14, 6, 4, 9, 11, 5, 12, 7, 4];
       wEl.innerHTML = `<div class="wave-bars">${h.map(v => `<span style="height:${v}px"></span>`).join('')}</div>`;
@@ -667,6 +700,12 @@ function updateDecorations() {
 function collectCurrentState() {
   const g = id => document.getElementById(id)?.value;
   return {
+   uploadedLogoDataUrl: uploadedLogoDataUrl,
+   selStageSep: g('selStageSep'),
+   selContactTone: g('selContactTone'),
+   inPlayCur: g('inPlayCur'),
+   inPlayEnd: g('inPlayEnd'),
+   rPlayPos: g('rPlayPos'),
    selFrontColorMode: g('selFrontColorMode'),
    cFBg: g('cFBg'),
    cFMain: g('cFMain'),
@@ -728,6 +767,7 @@ function collectCurrentState() {
 
 function applyStateObject(st) {
   if (!st) return;
+  if (st.uploadedLogoDataUrl) uploadedLogoDataUrl = st.uploadedLogoDataUrl;
   const setVal = (id, v) => {
     const el = document.getElementById(id);
     if (v !== undefined && el) el.value = v;
@@ -1196,3 +1236,10 @@ window.onload = () => {
   updateDecorations();
   updateFrontCard();
 };
+
+function toggleActualSize() {
+  const wrap = document.getElementById('stageWrap');
+  const btn = document.getElementById('tabActualSize');
+  wrap.classList.toggle('actual-size');
+  btn?.classList.toggle('active');
+}

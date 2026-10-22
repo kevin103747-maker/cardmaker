@@ -1341,3 +1341,25 @@ input[type="range"] {
   margin: 0 !important;
   transform: rotate(45deg) !important;
 }
+/* ================= 1:1 실물 크기 체감 뷰 & 연락처 기호 톤다운 디테일 ================= */
+.stage-canvas-wrap.actual-size .card-bleed-container {
+  transform: scale(0.46); /* 일반 모니터에서 실제 90x50mm 실물 명함 크기에 가깝게 축소 */
+  transform-origin: center center;
+  margin: -95px 0;
+}
+
+/* 연락처 내부의 하이픈(-), 골뱅이(@), 도메인(.com) 등을 서브 컬러로 은은하게 톤다운 */
+.c-text .tone-sub {
+  color: var(--text-sub);
+  opacity: 0.72;
+  font-weight: 300;
+}
+
+/* 영문예명과 한글예명 사이 마이크로 구분 기호 */
+.stage-sep-mark {
+  font-size: calc(var(--name-size) * 0.42);
+  color: var(--accent);
+  opacity: 0.55;
+  margin: 0 3px;
+  vertical-align: middle;
+}
