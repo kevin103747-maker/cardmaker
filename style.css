@@ -1393,3 +1393,46 @@ input[type="range"] {
 .player-time {
   font-size: var(--micro-font-size) !important;
 }
+/* ================= 세로선 & 중앙 다이아몬드 축 100% 일치 패치 ================= */
+.back-divider-wrap {
+  position: relative !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.back-divider-line {
+  position: relative !important;
+  width: var(--divider-width) !important;
+  height: var(--divider-height) !important;
+  margin: 0 auto !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+#outDividerGem.divider-gem {
+  position: absolute !important;
+  left: 50% !important;
+  top: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  padding: 6px 0 !important;
+  width: 14px !important;
+  margin: 0 !important;
+  background-color: var(--card-bg) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 5 !important;
+}
+
+#outDividerGem .true-diamond {
+  width: var(--dia-size, 7px) !important;
+  height: var(--dia-size, 7px) !important;
+  background-color: var(--accent) !important;
+  transform: rotate(45deg) !important;
+  display: block !important;
+  margin: 0 !important;
+  flex-shrink: 0 !important;
+}
